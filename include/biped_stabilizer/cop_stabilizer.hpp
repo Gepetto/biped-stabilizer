@@ -6,6 +6,7 @@
  * nondisclosure agreement with PAL Robotics SL. In this case it may not be
  * copied or disclosed except in accordance with the terms of that agreement.
  */
+
 #ifndef BIPED_STABILIZER_COP_STABILIZER
 #define BIPED_STABILIZER_COP_STABILIZER
 
@@ -44,6 +45,25 @@ struct CopStabilizerSettings {
   std::string cop_control_type = "p_cc";
   bool saturate_cop = true;
   bool use_rate_limited_dcm = false;
+
+  friend bool operator==(const CopStabilizerSettings &lhs, 
+                       const CopStabilizerSettings &rhs){
+    bool test = true;
+    test &= lhs.height == rhs.height;
+    test &= lhs.foot_length == rhs.foot_length;
+    test &= lhs.foot_width == rhs.foot_width;
+    test &= lhs.robot_mass == rhs.robot_mass;
+    test &= lhs.dt == rhs.dt;
+    test &= lhs.cop_x_gains == rhs.cop_x_gains;
+    test &= lhs.cop_y_gains == rhs.cop_y_gains;
+    test &= lhs.cop_p_cc_gain == rhs.cop_p_cc_gain;
+    test &= lhs.integral_gain == rhs.integral_gain;
+    test &= lhs.g == rhs.g;
+    test &= lhs.saturate_cop == rhs.saturate_cop;
+    test &= lhs.use_rate_limited_dcm == rhs.use_rate_limited_dcm;
+    return test;
+  }
+
 };
 
 class CopStabilizer {
@@ -65,63 +85,86 @@ class CopStabilizer {
 
   void configure(const CopStabilizerSettings &settings);
 
-  void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
-                 const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+  CopStabilizerSettings get_settings();
+
+  void stabilize(const eVector3 &actual_com, 
+                 const eVector3 &actual_com_vel,
+                 const eVector3 &actual_com_acc, 
+                 const eVector3 &actual_cop,
                  const eMatrixHoms &actual_stance_poses,
                  const eVector3 &reference_com,
                  const eVector3 &reference_com_vel,
                  const eVector3 &reference_com_acc,
-                 const eVector3 &reference_com_jerk, eVector3 &desired_com,
-                 eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                 const eVector3 &reference_com_jerk, 
+                 eVector3 &desired_com,
+                 eVector3 &desired_com_vel, 
+                 eVector3 &desired_com_acc,
                  eVector3 &desired_icp,            // ???
                  eVector3 &actual_icp,             // ???
                  eVector3 &desired_cop_reference,  // ???
                  eVector3 &desired_cop_computed);
 
-  void stabilizeCOP(const eVector3 &actual_com, const eVector3 &actual_com_vel,
-                    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+  void stabilizeCOP(const eVector3 &actual_com, 
+                    const eVector3 &actual_com_vel,
+                    const eVector3 &actual_com_acc, 
+                    const eVector3 &actual_cop,
                     const eMatrixHoms &actual_stance_poses,
                     const eVector3 &reference_com,
                     const eVector3 &reference_com_vel,
-                    const eVector3 &reference_com_acc, eVector3 &desired_com,
-                    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                    const eVector3 &reference_com_acc, 
+                    eVector3 &desired_com,
+                    eVector3 &desired_com_vel, 
+                    eVector3 &desired_com_acc,
                     eVector3 &desired_icp,            // ???
                     eVector3 &actual_icp,             // ???
                     eVector3 &desired_cop_reference,  // ???
                     eVector3 &desired_cop_computed);
 
   void stabilizeApproximateAcceleration(
-      const eVector3 &actual_com, const eVector3 &actual_com_vel,
-      const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-      const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
-      const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
-      eVector3 &desired_com, eVector3 &desired_com_vel,
+      const eVector3 &actual_com, 
+      const eVector3 &actual_com_vel,
+      const eVector3 &actual_com_acc, 
+      const eVector3 &actual_cop,
+      const eMatrixHoms &actual_stance_poses, 
+      const eVector3 &reference_com,
+      const eVector3 &reference_com_vel, 
+      const eVector3 &reference_com_acc,
+      eVector3 &desired_com, 
+      eVector3 &desired_com_vel,
       eVector3 &desired_com_acc,
       eVector3 &desired_icp,            // ???
       eVector3 &actual_icp,             // ???
       eVector3 &desired_cop_reference,  // ???
       eVector3 &desired_cop_computed);
 
-  void stabilizeP_CC(const eVector3 &actual_com, const eVector3 &actual_com_vel,
-                     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+  void stabilizeP_CC(const eVector3 &actual_com, 
+                     const eVector3 &actual_com_vel,
+                     const eVector3 &actual_com_acc, 
+                     const eVector3 &actual_cop,
                      const eMatrixHoms &actual_stance_poses,
                      const eVector3 &reference_com,
                      const eVector3 &reference_com_vel,
-                     const eVector3 &reference_com_acc, eVector3 &desired_com,
-                     eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                     const eVector3 &reference_com_acc, 
+                     eVector3 &desired_com,
+                     eVector3 &desired_com_vel, 
+                     eVector3 &desired_com_acc,
                      eVector3 &desired_icp,            // ???
                      eVector3 &actual_icp,             // ???
                      eVector3 &desired_cop_reference,  // ???
                      eVector3 &desired_cop_computed);
 
-  void stabilizeJerk(const eVector3 &actual_com, const eVector3 &actual_com_vel,
-                     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+  void stabilizeJerk(const eVector3 &actual_com, 
+                     const eVector3 &actual_com_vel,
+                     const eVector3 &actual_com_acc, 
+                     const eVector3 &actual_cop,
                      const eMatrixHoms &actual_stance_poses,
                      const eVector3 &reference_com,
                      const eVector3 &reference_com_vel,
                      const eVector3 &reference_com_acc,
-                     const eVector3 &reference_com_jerk, eVector3 &desired_com,
-                     eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                     const eVector3 &reference_com_jerk, 
+                     eVector3 &desired_com,
+                     eVector3 &desired_com_vel, 
+                     eVector3 &desired_com_acc,
                      eVector3 &desired_icp,            // ???
                      eVector3 &actual_icp,             // ???
                      eVector3 &desired_cop_reference,  // ???
@@ -168,23 +211,28 @@ class CopStabilizer {
                         const Eigen::Vector2d &rightFootPlace,
                         const Eigen::Vector2d &CoM,
                         const Eigen::Vector2d &lateral_gravity,
-                        const Eigen::Vector2d &externalForce, eVector3 &n);
+                        const Eigen::Vector2d &externalForce, 
+                        eVector3 &n);
 
   void getNonLinearPart(const eVector6 &leftFootWrench,
                         const eVector6 &rightFootWrench,
                         const Eigen::Vector2d &leftFootPlace,
                         const Eigen::Vector2d &rightFootPlace,
                         const Eigen::Vector2d &CoM,
-                        const Eigen::Vector2d &CoM_acc, eVector3 &n);
+                        const Eigen::Vector2d &CoM_acc, 
+                        eVector3 &n);
 
   void getNonLinearPart(const eVector6 &leftFootWrench,
                         const eVector6 &rightFootWrench,
                         const Eigen::Vector2d &leftFootPlace_c,
                         const Eigen::Vector2d &rightFootPlace_c,
-                        const Eigen::Vector2d &CoM_acc, eVector3 &n);
+                        const Eigen::Vector2d &CoM_acc, 
+                        eVector3 &n);
 
-  void getNonLinearPart(const eVector3 &com, const eVector3 &com_acc,
-                        const eVector3 &cop, eVector3 &n);
+  void getNonLinearPart(const eVector3 &com, 
+                        const eVector3 &com_acc,
+                        const eVector3 &cop, 
+                        eVector3 &n);
 
   void getNonLinearPart(eVector3 &n);
 
@@ -235,5 +283,5 @@ class CopStabilizer {
   CopStabilizerSettings settings_;
 };
 }  // namespace biped_stabilizer
-
 #endif // BIPED_STABILIZER_COP_STABILIZER
+
