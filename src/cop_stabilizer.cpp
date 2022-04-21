@@ -128,10 +128,6 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   //                   &errorSum_[1], &registered_variables_);
 }
 
-CopStabilizerSettings CopStabilizer::get_settings(){ 
-  return settings_;
-}
-
 void CopStabilizer::computeSupportPolygon(const eMatrixHoms &stance_poses,
                                           Polygon2D &convex_hull) {
   // Compute the global position of the feet edges.

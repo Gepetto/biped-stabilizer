@@ -63,7 +63,6 @@ struct CopStabilizerSettings {
     test &= lhs.use_rate_limited_dcm == rhs.use_rate_limited_dcm;
     return test;
   }
-
 };
 
 class CopStabilizer {
@@ -85,7 +84,7 @@ class CopStabilizer {
 
   void configure(const CopStabilizerSettings &settings);
 
-  CopStabilizerSettings get_settings();
+  const CopStabilizerSettings &get_settings() { return settings_; }
 
   void stabilize(const eVector3 &actual_com, 
                  const eVector3 &actual_com_vel,
