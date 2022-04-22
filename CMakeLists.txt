@@ -78,12 +78,13 @@ if(BUILD_PYTHON_INTERFACE)
   set_target_properties(${PY_NAME}_py PROPERTIES
     INSTALL_RPATH "$ORIGIN/../../.."
     LIBRARY_OUTPUT_DIRECTORY ${PY_NAME}
-    OUTPUT_NAME ${PY_NAME}
+    OUTPUT_NAME ${PY_NAME}_cpp
     PREFIX ""
     SUFFIX ${PYTHON_EXT_SUFFIX}
   )
   TARGET_LINK_BOOST_PYTHON(${PY_NAME}_py PRIVATE)
   install(TARGETS ${PY_NAME}_py DESTINATION ${${PY_NAME}_INSTALL_DIR})
+  install(DIRECTORY python/biped_stabilizer DESTINATION ${${PY_NAME}_INSTALL_DIR}/..)
 endif()
 
 # Unit tests

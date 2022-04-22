@@ -29,6 +29,7 @@ typedef std::vector<eVector2, Eigen::aligned_allocator<eVector2>> eVector2s;
 typedef std::vector<eVector3, Eigen::aligned_allocator<eVector3>> eVector3s;
 
 struct CopStabilizerSettings {
+public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
   double height = 0.0;
@@ -40,28 +41,57 @@ struct CopStabilizerSettings {
   eVector3 cop_y_gains = eVector3::Zero();
   double cop_p_cc_gain = 0.0;
   eVector2 integral_gain = eVector2::Zero();
+  
   // Meaningfull defaults.
   double g = 9.81;
   std::string cop_control_type = "p_cc";
   bool saturate_cop = true;
   bool use_rate_limited_dcm = false;
 
-  friend bool operator==(const CopStabilizerSettings &lhs, 
-                       const CopStabilizerSettings &rhs){
+  bool operator==(const CopStabilizerSettings &rhs){
     bool test = true;
-    test &= lhs.height == rhs.height;
-    test &= lhs.foot_length == rhs.foot_length;
-    test &= lhs.foot_width == rhs.foot_width;
-    test &= lhs.robot_mass == rhs.robot_mass;
-    test &= lhs.dt == rhs.dt;
-    test &= lhs.cop_x_gains == rhs.cop_x_gains;
-    test &= lhs.cop_y_gains == rhs.cop_y_gains;
-    test &= lhs.cop_p_cc_gain == rhs.cop_p_cc_gain;
-    test &= lhs.integral_gain == rhs.integral_gain;
-    test &= lhs.g == rhs.g;
-    test &= lhs.saturate_cop == rhs.saturate_cop;
-    test &= lhs.use_rate_limited_dcm == rhs.use_rate_limited_dcm;
+    test &= this->height == rhs.height;
+    test &= this->foot_length == rhs.foot_length;
+    test &= this->foot_width == rhs.foot_width;
+    test &= this->robot_mass == rhs.robot_mass;
+    test &= this->dt == rhs.dt;
+    test &= this->cop_x_gains == rhs.cop_x_gains;
+    test &= this->cop_y_gains == rhs.cop_y_gains;
+    test &= this->cop_p_cc_gain == rhs.cop_p_cc_gain;
+    test &= this->integral_gain == rhs.integral_gain;
+    test &= this->g == rhs.g;
+    test &= this->saturate_cop == rhs.saturate_cop;
+    test &= this->use_rate_limited_dcm == rhs.use_rate_limited_dcm;
     return test;
+  }
+
+  bool operator!=(const CopStabilizerSettings &rhs){
+    return !(*this == rhs);
+  }
+
+  std::string to_string(){
+    std::ostringstream oss;
+    oss << "CopStabilizerSettings:" << std::endl;
+    oss << "    - height = "<< this->height << std::endl;
+    oss << "    - foot_length = "<< this->foot_length << std::endl;
+    oss << "    - foot_width = "<< this->foot_width << std::endl;
+    oss << "    - robot_mass = "<< this->robot_mass << std::endl;
+    oss << "    - dt = "<< this->dt << std::endl;
+    oss << "    - cop_x_gains = "<< this->cop_x_gains.transpose() << std::endl;
+    oss << "    - cop_y_gains = "<< this->cop_y_gains.transpose() << std::endl;
+    oss << "    - cop_p_cc_gain = "<< this->cop_p_cc_gain << std::endl;
+    oss << "    - integral_gain = "<< this->integral_gain.transpose() << std::endl;
+    oss << "    - g = "<< this->g << std::endl;
+    oss << "    - cop_control_type = "<< this->cop_control_type << std::endl;
+    oss << "    - saturate_cop = "<< this->saturate_cop << std::endl;
+    oss << "    - use_rate_limited_dcm = "<< this->use_rate_limited_dcm << std::endl;
+    return oss.str();
+  }
+
+  std::ostream& operator<< (std::ostream& out)
+  {
+    out << this->to_string();
+    return out;
   }
 };
 
@@ -84,7 +114,7 @@ class CopStabilizer {
 
   void configure(const CopStabilizerSettings &settings);
 
-  const CopStabilizerSettings &get_settings() { return settings_; }
+  const CopStabilizerSettings &getSettings() { return settings_; }
 
   void stabilize(const eVector3 &actual_com, 
                  const eVector3 &actual_com_vel,
