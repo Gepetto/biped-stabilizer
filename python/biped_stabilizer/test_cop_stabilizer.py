@@ -6,9 +6,10 @@ Created on Wed Apr 20 15:38:12 2022
 @author: nvilla
 """
 
-import biped_stabilizer
+import biped_stabilizer as bs
+bs.switchToNumpyArray()
 import numpy as np
-import talos_conf as conf
+import cricket.talos_conf as conf
 
 import unittest
 
@@ -30,7 +31,7 @@ class StabilizerTestCase(unittest.TestCase):
                       saturate_cop = True,
                       use_rate_limited_dcm = False,
                       )
-        tracker = biped_stabilizer.CopStabilizer()
+        tracker = bs.CopStabilizer()
         tracker.configure(settings)
         
         self.tracker = tracker
