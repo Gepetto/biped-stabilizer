@@ -19,6 +19,23 @@ CopStabilizer::CopStabilizer(const CopStabilizerSettings &settings)
       jerk_ma_queue_(),
       errorSum_(Eigen::Vector2d::Zero()) {
   configure(settings);
+
+  aig::BipedIGSettings biped_settings; 
+
+  const std::string path_to_robots = "/opt/pal/ferrum/share/talos_description";
+  biped_settings.urdf_path = path_to_robots + "/robots/talos_reduced.urdf";
+  biped_settings.srdf_path = path_to_robots + "/srdf/talos.srdf";
+
+  biped_settings.left_hip_joint_name = "leg_left_1_joint";
+  biped_settings.right_hip_joint_name = "leg_right_1_joint";
+  biped_settings.left_knee_joint_name = "leg_left_4_joint";
+  biped_settings.right_knee_joint_name = "leg_right_4_joint";
+  biped_settings.left_ankle_joint_name = "leg_left_5_joint";
+  biped_settings.right_ankle_joint_name = "leg_right_5_joint";
+  biped_settings.left_foot_frame_name = "leg_left_sole_fix_joint";
+  biped_settings.right_foot_frame_name = "leg_right_sole_fix_joint";
+
+  accordingIG_ = aig::BipedIG(biped_settings);
 }
 
 CopStabilizer::~CopStabilizer() {}
@@ -33,18 +50,25 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   w_ = std::sqrt(w2_);
   // These system matrices correspond to "dP->CCP" state: c, c_dot, ccop and
   // input ccop_dot
-  A_ << cosh(w_ * dt), sinh(w_ * dt) / w_, 1 - cosh(w_ * dt),
-      w_ * sinh(w_ * dt), cosh(w_ * dt), -w_ * sinh(w_ * dt), 0, 0, 1;
-  B_ << dt - sinh(w_ * dt) / w_, 1 - cosh(w_ * dt), dt;
+  A_ << cosh(w_ * dt),      sinh(w_ * dt) / w_, 1 - cosh(w_ * dt),
+        w_ * sinh(w_ * dt), cosh(w_ * dt),     -w_ * sinh(w_ * dt),
+        0,                  0,                  1;
+  B_ << dt - sinh(w_ * dt) / w_,
+        1 - cosh(w_ * dt),
+        dt;
 
   cx_gainK_ = settings_.cop_x_gains;
   cy_gainK_ = settings_.cop_y_gains;
 
-  A22_ << cosh(w_ * dt), sinh(w_ * dt) / w_, w_ * sinh(w_ * dt), cosh(w_ * dt);
+  A22_ << cosh(w_ * dt),      sinh(w_ * dt) / w_,
+          w_ * sinh(w_ * dt), cosh(w_ * dt);
   B2_ << 1 - cosh(w_ * dt), -w_ * sinh(w_ * dt);
 
-  Aj_ << 1, dt, dt * dt / 2, 0, 1, dt, 0, 0, 1;
-  Bj_ << dt * dt * dt / 6, dt * dt / 2, dt;
+  Aj_ << 1, dt, dt * dt / 2, 
+         0,  1, dt, 
+         0,  0, 1;
+  Bj_ << dt * dt * dt / 6,
+         dt * dt / 2, dt;
 
   //  cx_gainK2_ << 3.36, 3.36/w;
   //  cy_gainK2_ << 3.36, 3.36/w;
@@ -52,24 +76,26 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   cy_gainK2_ << settings_.cop_p_cc_gain, settings_.cop_p_cc_gain / w_;
 
   // values for J_CCC method
-  S_coms_j_ << 1, dt - 2 * DT_DERIVATIVE, pow(dt - 2 * DT_DERIVATIVE, 2) / 2, 1,
-      dt - DT_DERIVATIVE, pow(dt - DT_DERIVATIVE, 2) / 2, 1, dt, pow(dt, 2) / 2;
-  U_coms_j_ << pow(dt - 2 * DT_DERIVATIVE, 3) / 6,
-      pow(dt - DT_DERIVATIVE, 3) / 6, pow(dt, 3) / 6;
+  S_coms_j_ << 1, dt - DT_DERIVATIVE, pow(dt - DT_DERIVATIVE, 2) / 2,
+               1, dt ,                pow(dt , 2) / 2, 
+               1, dt + DT_DERIVATIVE, pow(dt + DT_DERIVATIVE, 2) / 2;
+  U_coms_j_ << pow(dt - DT_DERIVATIVE, 3) / 6,
+               pow(dt, 3) / 6, 
+               pow(dt + DT_DERIVATIVE, 3) / 6;
 
   // Values for P_CC method
-  S_coms_ << cosh(w_ * (dt - 2 * DT_DERIVATIVE)),
-      sinh(w_ * (dt - 2 * DT_DERIVATIVE)) / w_, cosh(w_ * (dt - DT_DERIVATIVE)),
-      sinh(w_ * (dt - DT_DERIVATIVE)) / w_, cosh(w_ * dt), sinh(w_ * dt) / w_;
-  U_coms_ << 1 - cosh(w_ * (dt - 2 * DT_DERIVATIVE)),
-      1 - cosh(w_ * (dt - DT_DERIVATIVE)), 1 - cosh(w_ * dt);
+  S_coms_ << cosh(w_ * (dt - DT_DERIVATIVE)), sinh(w_ * (dt - DT_DERIVATIVE)) / w_,
+             cosh(w_ * dt),     sinh(w_ * dt) / w_,
+             cosh(w_ * (dt + DT_DERIVATIVE)), sinh(w_ * (dt + DT_DERIVATIVE)) / w_;
+  U_coms_ << 1 - cosh(w_ * (dt - DT_DERIVATIVE)),
+             1 - cosh(w_ * dt), 
+             1 - cosh(w_ * (dt + DT_DERIVATIVE));
 
   target_com_.setZero();
   target_com_vel_.setZero();
   target_com_acc_.setZero();
   non_linear_.setZero();
   target_cop_.setZero();
-  desired_uncampled_cop_.setZero();
   errorSum_.setZero();
 
   local_foot_description_.resize(4);
@@ -208,7 +234,7 @@ void CopStabilizer::stabilize(
                              settings_.cop_control_type);
 }
 
-void CopStabilizer::stabilizeCOP(
+void CopStabilizer::stabilizeCOP(//Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
@@ -325,7 +351,7 @@ void CopStabilizer::stabilizeCOP(
   old_reference_com_acc_ = reference_com_acc;
 }
 
-void CopStabilizer::stabilizeApproximateAcceleration(
+void CopStabilizer::stabilizeApproximateAcceleration(//Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
@@ -642,8 +668,8 @@ void CopStabilizer::stabilizeJerk(
 }
 
 std::array<eVector3, 3> CopStabilizer::getStableCoMs(
-    const std::string &control_type, const double &com_height) {
-  if (control_type == "p_cc") {
+  const double &com_height) {
+  if (settings_.cop_control_type == "p_cc") {
     return {{eVector3(S_coms_.block<1, 2>(0, 0) * actualState2d_x_ +
                           U_coms_(0) * actual_command_.x(),
                       S_coms_.block<1, 2>(0, 0) * actualState2d_y_ +
@@ -659,7 +685,7 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
                       S_coms_.block<1, 2>(2, 0) * actualState2d_y_ +
                           U_coms_(2) * actual_command_.y(),
                       com_height)}};
-  } else if (control_type == "j_ccc") {
+  } else if (settings_.cop_control_type == "j_ccc") {
     return {{eVector3(S_coms_j_.block<1, 3>(0, 0) * actualState3d_x_ +
                           U_coms_j_(0) * actual_command_.x(),
                       S_coms_j_.block<1, 3>(0, 0) * actualState3d_y_ +
@@ -679,6 +705,30 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
     throw std::runtime_error(
         "Invalid control type in CopStabilizer::getStableCoMs");
   }
+}
+
+void CopStabilizer::computeWBreferences(const std::array<eVector3, 3> &coms,
+                                        const std::array<eMatrixHom, 3> &left_stance_poses,
+                                        const std::array<eMatrixHom, 3> &right_stance_poses,
+                                        Eigen::VectorXd &q,
+                                        Eigen::VectorXd &dq,
+                                        Eigen::VectorXd &ddq,
+                                        eVector3 &n, 
+                                        eVector3 &cop,
+                                        eVector3 &L,
+                                        eVector3 &dL,
+                                        double &wd) {
+  
+  accordingIG_.solve(coms, left_stance_poses, right_stance_poses,
+                     accordingIG_.getQ0(), q, dq, ddq, DT_DERIVATIVE);
+  accordingIG_.set_com_from_waist(q);
+
+  n = eVector3(accordingIG_.computeNL(q, dq, ddq), 0); // all dynamic values can be taken after this line
+  dL = accordingIG_.getAMVariation();
+  eVector3 cop(accordingIG_.getCoP(), 0);
+  // AM_ += dL*settings_.dt; L = AM_
+  L = eVector3(0,0,0);
+  wd = 0;
 }
 
 template <typename T, typename vec_T>

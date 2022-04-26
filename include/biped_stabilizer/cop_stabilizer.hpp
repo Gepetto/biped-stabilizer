@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "biped_stabilizer/third_party/wykobi/wykobi.hpp"
+#include "aig/biped_ig.hpp"
 
 namespace biped_stabilizer {
 
@@ -199,9 +200,20 @@ class CopStabilizer {
                      eVector3 &desired_cop_reference,  // ???
                      eVector3 &desired_cop_computed);
 
-  std::array<eVector3, 3> getStableCoMs(const std::string &control_type,
-                                        const double &com_height);
+  std::array<eVector3, 3> getStableCoMs(const double &com_height);
 
+  void computeWBreferences(const std::array<eVector3, 3> &coms,
+                           const std::array<eMatrixHom, 3> &left_stance_poses,
+                           const std::array<eMatrixHom, 3> &right_stance_poses,
+                           Eigen::VectorXd &q,
+                           Eigen::VectorXd &dq,
+                           Eigen::VectorXd &ddq,
+                           eVector3 &n, 
+                           eVector3 &cop,
+                           eVector3 &L,
+                           eVector3 &dL,
+                           double &wd);
+ 
  private:
   void computeSupportPolygon(const eMatrixHoms &stance_poses,
                              Polygon2D &convex_hull);
@@ -310,6 +322,8 @@ class CopStabilizer {
 
   // Input settings.
   CopStabilizerSettings settings_;
+  aig::BipedIG accordingIG_;
+
 };
 }  // namespace biped_stabilizer
 #endif // BIPED_STABILIZER_COP_STABILIZER
