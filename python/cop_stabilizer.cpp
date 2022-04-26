@@ -29,13 +29,13 @@ bp::tuple CopStabilizer_stabilize(
     eVector3 reference_com_vel = bp::extract<eVector3>(args["reference_com_vel"]);
     eVector3 reference_com_acc = bp::extract<eVector3>(args["reference_com_acc"]);
     eVector3 reference_com_jerk = bp::extract<eVector3>(args["reference_com_jerk"]);
-    eVector3 desired_com = bp::extract<eVector3>(args["desired_com"]);
-    eVector3 desired_com_vel = bp::extract<eVector3>(args["desired_com_vel"]);
-    eVector3 desired_com_acc = bp::extract<eVector3>(args["desired_com_acc"]);
-    eVector3 desired_icp = bp::extract<eVector3>(args["desired_icp"]);
-    eVector3 actual_icp = bp::extract<eVector3>(args["actual_icp"]);
-    eVector3 desired_cop_reference = bp::extract<eVector3>(args["desired_cop_reference"]);
-    eVector3 desired_cop_computed = bp::extract<eVector3>(args["desired_cop_computed"]);
+    eVector3 desired_com;
+    eVector3 desired_com_vel;
+    eVector3 desired_com_acc;
+    eVector3 desired_icp;
+    eVector3 actual_icp;
+    eVector3 desired_cop_reference;
+    eVector3 desired_cop_computed;
     
     eMatrixHoms actual_stance_poses;
     to_std_vector(args["actual_stance_poses"], actual_stance_poses);
