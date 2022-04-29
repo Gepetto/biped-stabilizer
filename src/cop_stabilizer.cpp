@@ -20,22 +20,6 @@ CopStabilizer::CopStabilizer(const CopStabilizerSettings &settings)
       errorSum_(Eigen::Vector2d::Zero()) {
   configure(settings);
 
-  aig::BipedIGSettings biped_settings; 
-
-  const std::string path_to_robots = "/opt/pal/ferrum/share/talos_description";
-  biped_settings.urdf_path = path_to_robots + "/robots/talos_reduced.urdf";
-  biped_settings.srdf_path = path_to_robots + "/srdf/talos.srdf";
-
-  biped_settings.left_hip_joint_name = "leg_left_1_joint";
-  biped_settings.right_hip_joint_name = "leg_right_1_joint";
-  biped_settings.left_knee_joint_name = "leg_left_4_joint";
-  biped_settings.right_knee_joint_name = "leg_right_4_joint";
-  biped_settings.left_ankle_joint_name = "leg_left_5_joint";
-  biped_settings.right_ankle_joint_name = "leg_right_5_joint";
-  biped_settings.left_foot_frame_name = "leg_left_sole_fix_joint";
-  biped_settings.right_foot_frame_name = "leg_right_sole_fix_joint";
-
-  accordingIG_ = aig::BipedIG(biped_settings);
 }
 
 CopStabilizer::~CopStabilizer() {}
@@ -113,6 +97,9 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   wykobi_foot_description_.reserve(10 * 4);
   jerk_ma_queue_.clear();
 
+  aig::BipedIGSettings biped_settings = aig::makeSettingsFor("talos"); 
+  accordingIG_ = aig::BipedIG(biped_settings);
+
   // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_X",
   //                   &target_com_[0], &registered_variables_);
   // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_Y",
@@ -152,6 +139,7 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   //                   &errorSum_[0], &registered_variables_);
   // REGISTER_VARIABLE("/introspection_data", "StabilizerErrorSum_Y",
   //                   &errorSum_[1], &registered_variables_);
+  
 }
 
 void CopStabilizer::computeSupportPolygon(const eMatrixHoms &stance_poses,
@@ -373,7 +361,7 @@ void CopStabilizer::stabilizeApproximateAcceleration(//Not supported
   target_com_vel_ = reference_com_vel;
   target_com_acc_ = reference_com_acc;
 
-  // REFERENC
+  // REFERENCE
   static Eigen::Vector3d old_reference_com_acc = reference_com_acc;
   Eigen::Vector3d reference_com_jerky(
       (reference_com_acc - old_reference_com_acc) / dt);
@@ -647,7 +635,7 @@ void CopStabilizer::stabilizeJerk(
           (COP_clamped - nextRefCCOP - non_linear_.head<2>() - LA_trErr_0) /
           (L.transpose() * Bj_);
       actual_command_ = reference_com_jerk.head<2>() + saturatedFeedbackTerm;
-      std::cout << COP_clamped << "\n\n\n\n\n" << std::endl;
+
       nextState_x = Aj_ * actualState3d_x_ + Bj_ * actual_command_.x();
       nextState_y = Aj_ * actualState3d_y_ + Bj_ * actual_command_.y();
     }
@@ -707,28 +695,29 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
   }
 }
 
-void CopStabilizer::computeWBreferences(const std::array<eVector3, 3> &coms,
-                                        const std::array<eMatrixHom, 3> &left_stance_poses,
-                                        const std::array<eMatrixHom, 3> &right_stance_poses,
-                                        Eigen::VectorXd &q,
-                                        Eigen::VectorXd &dq,
+void CopStabilizer::computeWBreferences(std::array<eMatrixHom, 3> LFs,
+                                        std::array<eMatrixHom, 3> RFs,
+                                        Eigen::VectorXd &q, 
+                                        Eigen::VectorXd &dq, 
                                         Eigen::VectorXd &ddq,
-                                        eVector3 &n, 
-                                        eVector3 &cop,
-                                        eVector3 &L,
-                                        eVector3 &dL,
-                                        double &wd) {
-  
-  accordingIG_.solve(coms, left_stance_poses, right_stance_poses,
-                     accordingIG_.getQ0(), q, dq, ddq, DT_DERIVATIVE);
-  accordingIG_.set_com_from_waist(q);
+                                        eVector3 &n,
+                                        eVector3 &dL,       
+                                        eVector3 &cop,       
+                                        eVector3 &L) {
+  static eVector3 L_AngMoment(0,0,0);
 
-  n = eVector3(accordingIG_.computeNL(q, dq, ddq), 0); // all dynamic values can be taken after this line
+  std::array<eVector3, 3> coms = getStableCoMs(settings_.height);
+  accordingIG_.solve(coms, LFs, RFs, accordingIG_.getQ0(), 
+                     q, dq, ddq, DT_DERIVATIVE);
+  accordingIG_.set_com_from_waist(q);
+  accordingIG_.computeDynamics(q, dq, ddq);
+  n = eVector3::Zero();
+  n.head<2>() = accordingIG_.getNL();
   dL = accordingIG_.getAMVariation();
-  eVector3 cop(accordingIG_.getCoP(), 0);
-  // AM_ += dL*settings_.dt; L = AM_
-  L = eVector3(0,0,0);
-  wd = 0;
+  L = L_AngMoment + dL * settings_.dt;
+  cop = eVector3::Zero();
+  cop.head<2>() = accordingIG_.getCoP();
+
 }
 
 template <typename T, typename vec_T>

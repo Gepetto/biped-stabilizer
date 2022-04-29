@@ -202,17 +202,15 @@ class CopStabilizer {
 
   std::array<eVector3, 3> getStableCoMs(const double &com_height);
 
-  void computeWBreferences(const std::array<eVector3, 3> &coms,
-                           const std::array<eMatrixHom, 3> &left_stance_poses,
-                           const std::array<eMatrixHom, 3> &right_stance_poses,
-                           Eigen::VectorXd &q,
-                           Eigen::VectorXd &dq,
+  void computeWBreferences(std::array<eMatrixHom, 3> LFs,
+                           std::array<eMatrixHom, 3> RFs,
+                           Eigen::VectorXd &q, 
+                           Eigen::VectorXd &dq, 
                            Eigen::VectorXd &ddq,
-                           eVector3 &n, 
-                           eVector3 &cop,
-                           eVector3 &L,
-                           eVector3 &dL,
-                           double &wd);
+                           eVector3 &n,
+                           eVector3 &dL,       
+                           eVector3 &cop,       
+                           eVector3 &L);
  
  private:
   void computeSupportPolygon(const eMatrixHoms &stance_poses,

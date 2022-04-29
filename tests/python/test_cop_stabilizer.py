@@ -9,6 +9,8 @@ Created on Wed Apr 20 15:38:12 2022
 import biped_stabilizer as bs
 from biped_stabilizer.biped_stabilizer_cpp import eMatrixHom
 import numpy as np
+import pinocchio as pin
+from example_robot_data.robots_loader import load
 
 import unittest
 unittest.util._MAX_LENGTH = 2000
@@ -52,6 +54,12 @@ class TestCopStabilizer(unittest.TestCase):
                 )
         self.arguments = arguments
         
+        # Pinocchio robot
+        
+        self.robot = load("talos")
+        self.model = self.robot.model
+        self.data = self.robot.data
+        
     def test_constructor(self):
         assert bs.CopStabilizerSettings() == bs.CopStabilizerSettings()
         self.stab.configure(self.settings)
@@ -76,7 +84,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2]<error).all())
         self.assertTrue((desired["cop"][:2]==self.settings.cop_p_cc_gain*np.array(error)).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -96,7 +104,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2]<error2).all())
         self.assertTrue((desired["cop"][:2] < self.settings.cop_p_cc_gain*np.array(error2)).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -116,7 +124,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2] == error3).all())
         self.assertTrue((desired["cop"][:2] == error3).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -144,7 +152,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2]<error).all())
         self.assertTrue((desired["cop"][:2] > self.settings.cop_p_cc_gain * np.array(error)).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -172,7 +180,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2] < error).all())
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -192,7 +200,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2]<error2).all())
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)<1e-15).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -212,7 +220,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2] == error3).all())
         self.assertTrue((desired["cop"][:2] == error3).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((n==0).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -241,7 +249,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((desired["com"][:2] < error).all())
         self.assertTrue((desired["cop"][:2] > desired["com"][:2] ).all())
         
-        n = desired["cop"][:2] - desired["com"][:2] + desired["ddcom"][:2]/w2
+        n = desired["n"]
         self.assertTrue((np.abs(n)<1e-15).all())
         
         desired_1000 = stab_loop(self.stab, self.arguments, 1000)
@@ -249,6 +257,44 @@ class TestCopStabilizer(unittest.TestCase):
         self.assertTrue((np.abs(desired_1000["com"][:2] +
                          desired_1000["dcom"][:2]/w) < 1e-3).all())
         self.assertTrue((np.abs(desired_1000["cop"][:2]) < 1e-3).all())
+        
+    def test_compute_wb_references(self):
+        self.settings.cop_control_type = "p_cc"
+        self.settings.cop_p_cc_gain = 3         #the gain used is [k, k/w]
+        self.stab.configure(self.settings)
+        
+        error = [0.02, 0.02]
+        self.arguments["actual_com"][:2] = error
+        self.arguments["actual_cop"][:2] = error
+        
+        desired = stab_loop(self.stab, self.arguments, 1)
+        
+        LFs = [self.arguments["actual_stance_poses"][0]]*3
+        RFs = [self.arguments["actual_stance_poses"][1]]*3
+        
+        reference = self.stab.compute_wb_references(LFs, RFs)
+        pin.centerOfMass(self.model, self.data, reference["q"], 
+                                                reference["dq"], 
+                                                reference["ddq"])
+        reference_com = self.data.com[0]
+        reference_dcom = self.data.vcom[0]
+        reference_ddcom = self.data.acom[0]
+        
+        self.assertTrue((np.abs(reference["cop"] - desired["cop"]) < 1e-2).all())
+        self.assertTrue((np.abs(reference_com - desired["com"]) < 1e-2).all())
+        self.assertTrue((np.abs(reference_dcom - desired["dcom"]) < 1e-2).all())
+        self.assertTrue((np.abs(reference_ddcom - desired["ddcom"]) < 1e-1).all())
+        self.assertTrue(reference["dL"].size == 3)
+        self.assertTrue(reference["L"].size == 3)
+        self.assertTrue((np.abs(reference["n"]) < 0.05).all())
+        
+        print("cop_diff", reference["cop"]- desired["cop"])
+        print("n", reference["n"], desired["n"])
+        print("dL: ", reference["dL"])
+        
+        print("com_diff", reference_com-desired["com"])
+        print("dcom_diff", reference_dcom-desired["dcom"])
+        print("ddcom_diff", reference_ddcom-desired["ddcom"])
         
 def stab_loop(tracker, arguments, iterations, printing=False):
     settigs = tracker.get_settings()
@@ -266,7 +312,10 @@ def stab_loop(tracker, arguments, iterations, printing=False):
     desired = dict(com = results[0],
                    dcom = results[1],
                    ddcom = results[2],
-                   cop = results[6])
+                   cop = results[6],
+                   n = np.hstack([results[6][:2] -
+                                  results[0][:2] + 
+                                  results[2][:2]/w2, 0]))
     
     return desired
 
@@ -277,7 +326,9 @@ def print_loop_results(results, arguments, w2, printing=False):
         print("B:   ", results[0][:2] - results[2][:2]/w2)
         print("CoP: ", results[6][:2])
         print("rCP: ", arguments["reference_com"][:2] - arguments["reference_com_acc"][:2]/w2)
-        print("n:   ", results[5])
+        print("n:   ", np.hstack([results[6][:2] -
+                                  results[0][:2] + 
+                                  results[2][:2]/w2, 0]))
 
 if __name__ == "__main__":
     
