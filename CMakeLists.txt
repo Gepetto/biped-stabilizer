@@ -100,4 +100,5 @@ endif()
 
 # Installation
 install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 install(FILES package.xml DESTINATION share/${PROJECT_NAME})
