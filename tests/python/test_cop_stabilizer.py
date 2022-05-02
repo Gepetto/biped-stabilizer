@@ -209,7 +209,7 @@ class TestCopStabilizer(unittest.TestCase):
                          desired_1000["dcom"][:2]/w < 1e-5).all())
         self.assertTrue((desired_1000["cop"][:2] < 1e-5).all())
         
-        # ~~~~ WITH UNSTABLE SATURATION ~~~~ ##  TODO: IT is not saturating correctly.
+        # ~~~~ WITH UNSTABLE SATURATION ~~~~ ##  
         error3 = [0.1, 0.14]
         self.arguments["actual_com"][:2] = error3
         self.arguments["actual_cop"][:2] = error3
@@ -271,8 +271,12 @@ class TestCopStabilizer(unittest.TestCase):
         
         LFs = [self.arguments["actual_stance_poses"][0]]*3
         RFs = [self.arguments["actual_stance_poses"][1]]*3
+        com_tolerance = 1e-10
+        max_num_iterations = 20
         
-        reference = self.stab.compute_wb_references(LFs, RFs)
+        reference = self.stab.compute_wb_references(LFs, RFs, 
+                                                    com_tolerance, 
+                                                    max_num_iterations)
         pin.centerOfMass(self.model, self.data, reference["q"], 
                                                 reference["dq"], 
                                                 reference["ddq"])
@@ -280,21 +284,26 @@ class TestCopStabilizer(unittest.TestCase):
         reference_dcom = self.data.vcom[0]
         reference_ddcom = self.data.acom[0]
         
-        self.assertTrue((np.abs(reference["cop"] - desired["cop"]) < 1e-2).all())
-        self.assertTrue((np.abs(reference_com - desired["com"]) < 1e-2).all())
-        self.assertTrue((np.abs(reference_dcom - desired["dcom"]) < 1e-2).all())
-        self.assertTrue((np.abs(reference_ddcom - desired["ddcom"]) < 1e-1).all())
+        self.assertTrue((np.abs(reference["cop"] - 
+                                desired["cop"] - 
+                                reference["n"]) < 1e-4).all())
+        self.assertTrue((np.abs(reference_com - desired["com"]) < 1e-4).all())
+        self.assertTrue((np.abs(reference_dcom - desired["dcom"]) < 1e-4).all())
+        self.assertTrue((np.abs(reference_ddcom - desired["ddcom"]) < 1e-3).all())
         self.assertTrue(reference["dL"].size == 3)
         self.assertTrue(reference["L"].size == 3)
         self.assertTrue((np.abs(reference["n"]) < 0.05).all())
         
-        print("cop_diff", reference["cop"]- desired["cop"])
-        print("n", reference["n"], desired["n"])
-        print("dL: ", reference["dL"])
-        
+        print("cop_diff", reference["cop"] - desired["cop"] - reference["n"])
         print("com_diff", reference_com-desired["com"])
         print("dcom_diff", reference_dcom-desired["dcom"])
         print("ddcom_diff", reference_ddcom-desired["ddcom"])
+        
+        print("dL: ", reference["dL"])
+        print("L:  ", reference["L"])
+        print("n", reference["n"], desired["n"])
+        
+        
         
 def stab_loop(tracker, arguments, iterations, printing=False):
     settigs = tracker.get_settings()

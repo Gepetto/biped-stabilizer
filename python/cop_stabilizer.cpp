@@ -18,7 +18,10 @@ void to_std_vector( const bp::object& iterable, std::vector< T, Eigen::aligned_a
         bp::stl_input_iterator< T >( ) );
 }
 
-bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet, bp::list rightFeet){
+bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet, 
+                                                  bp::list rightFeet,
+                                                  double com_tolerance, 
+                                                  int max_iterations){
     
     std::array<eMatrixHom, 3> LFs{ {bp::extract<eMatrixHom>(leftFeet[0]), 
                                     bp::extract<eMatrixHom>(leftFeet[1]),
@@ -29,7 +32,7 @@ bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet, bp::list ri
 
     Eigen::VectorXd q, dq, ddq;
     eVector3 n, dL, cop, L;
-    self.computeWBreferences(LFs, RFs, q, dq, ddq, n, dL, cop, L);
+    self.computeWBreferences(LFs, RFs, q, dq, ddq, n, dL, cop, L, com_tolerance, max_iterations);
 
     bp::dict references;
     references["q"] = q;

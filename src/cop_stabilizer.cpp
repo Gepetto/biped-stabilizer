@@ -5,7 +5,7 @@
 
 namespace biped_stabilizer {
 
-const double DT_DERIVATIVE = 1e-5;
+const double DT_DERIVATIVE = 1e-4;
 
 CopStabilizer::CopStabilizer()
     : configured_(false),
@@ -695,20 +695,22 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
   }
 }
 
-void CopStabilizer::computeWBreferences(std::array<eMatrixHom, 3> LFs,
-                                        std::array<eMatrixHom, 3> RFs,
+void CopStabilizer::computeWBreferences(const std::array<eMatrixHom, 3> &LFs,
+                                        const std::array<eMatrixHom, 3> &RFs,
                                         Eigen::VectorXd &q, 
                                         Eigen::VectorXd &dq, 
                                         Eigen::VectorXd &ddq,
                                         eVector3 &n,
                                         eVector3 &dL,       
                                         eVector3 &cop,       
-                                        eVector3 &L) {
+                                        eVector3 &L, 
+                                        const double &com_tolerace, 
+                                        const int &max_iterations) {
   static eVector3 L_AngMoment(0,0,0);
 
   std::array<eVector3, 3> coms = getStableCoMs(settings_.height);
   accordingIG_.solve(coms, LFs, RFs, accordingIG_.getQ0(), 
-                     q, dq, ddq, DT_DERIVATIVE);
+                     q, dq, ddq, DT_DERIVATIVE, com_tolerace, max_iterations);
   accordingIG_.set_com_from_waist(q);
   accordingIG_.computeDynamics(q, dq, ddq);
   n = eVector3::Zero();
