@@ -200,6 +200,14 @@ class CopStabilizer {
                      eVector3 &desired_cop_reference,  // ???
                      eVector3 &desired_cop_computed);
 
+  double distributeForces(const eVector2 &desired_cop, 
+                          const eVector2 LF_xy,
+                          const double LF_force_z,
+                          const eVector2 LF_torque_xy,
+                          const eVector2 RF_xy, 
+                          const double RF_force_z,
+                          const eVector2 RF_torque_xy);
+
   std::array<eVector3, 3> getStableCoMs(const double &com_height);
 
   void computeWBreferences(const std::array<eMatrixHom, 3> &LFs,
@@ -207,6 +215,7 @@ class CopStabilizer {
                            Eigen::VectorXd &q, 
                            Eigen::VectorXd &dq, 
                            Eigen::VectorXd &ddq,
+                           Eigen::VectorXd &tau,
                            eVector3 &n,
                            eVector3 &dL,       
                            eVector3 &cop,       
@@ -285,6 +294,7 @@ class CopStabilizer {
   eVector3 cx_gainK_, cy_gainK_;
   eVector2 cx_gainK2_, cy_gainK2_;
   bool saturate_cop_;
+  Eigen::Matrix2d RotPi_2_;
 
   // sqrt(g/h), g/h
   double w_, w2_;

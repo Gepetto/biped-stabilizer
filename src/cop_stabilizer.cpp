@@ -32,6 +32,7 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   first_iter_ = true;
   w2_ = settings_.g / settings_.height;
   w_ = std::sqrt(w2_);
+  RotPi_2_ << 0, -1, 1, 0;
   // These system matrices correspond to "dP->CCP" state: c, c_dot, ccop and
   // input ccop_dot
   A_ << cosh(w_ * dt),      sinh(w_ * dt) / w_, 1 - cosh(w_ * dt),
@@ -655,6 +656,20 @@ void CopStabilizer::stabilizeJerk(
                           nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
 }
 
+double CopStabilizer::distributeForces(const eVector2 &desired_cop, 
+                                       const eVector2 LF_xy,
+                                       const double LF_force_z,
+                                       const eVector2 LF_torque_xy,
+                                       const eVector2 RF_xy, 
+                                       const double RF_force_z,
+                                       const eVector2 RF_torque_xy)
+{
+    Eigen::Vector2d cop_L(LF_xy + RotPi_2_*LF_torque_xy/LF_force_z);
+    Eigen::Vector2d cop_R(RF_xy + RotPi_2_*RF_torque_xy/RF_force_z);
+
+    return (desired_cop - cop_R).norm()/(cop_L - cop_R).norm();
+}
+
 std::array<eVector3, 3> CopStabilizer::getStableCoMs(
   const double &com_height) {
   if (settings_.cop_control_type == "p_cc") {
@@ -700,6 +715,7 @@ void CopStabilizer::computeWBreferences(const std::array<eMatrixHom, 3> &LFs,
                                         Eigen::VectorXd &q, 
                                         Eigen::VectorXd &dq, 
                                         Eigen::VectorXd &ddq,
+                                        Eigen::VectorXd &tau,
                                         eVector3 &n,
                                         eVector3 &dL,       
                                         eVector3 &cop,       
@@ -719,7 +735,7 @@ void CopStabilizer::computeWBreferences(const std::array<eMatrixHom, 3> &LFs,
   L = L_AngMoment + dL * settings_.dt;
   cop = eVector3::Zero();
   cop.head<2>() = accordingIG_.getCoP();
-
+  tau = accordingIG_.getJointTorques();
 }
 
 template <typename T, typename vec_T>

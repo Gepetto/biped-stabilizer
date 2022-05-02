@@ -303,8 +303,6 @@ class TestCopStabilizer(unittest.TestCase):
         print("L:  ", reference["L"])
         print("n", reference["n"], desired["n"])
         
-        
-        
 def stab_loop(tracker, arguments, iterations, printing=False):
     settigs = tracker.get_settings()
     w2 = settigs.g/settigs.height

@@ -30,9 +30,10 @@ bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet,
                                     bp::extract<eMatrixHom>(rightFeet[1]),
                                     bp::extract<eMatrixHom>(rightFeet[2])} };
 
-    Eigen::VectorXd q, dq, ddq;
+    Eigen::VectorXd q, dq, ddq, tau;
     eVector3 n, dL, cop, L;
-    self.computeWBreferences(LFs, RFs, q, dq, ddq, n, dL, cop, L, com_tolerance, max_iterations);
+    self.computeWBreferences(LFs, RFs, q, dq, ddq, tau, n, dL, cop, 
+                             L, com_tolerance, max_iterations);
 
     bp::dict references;
     references["q"] = q;
@@ -42,6 +43,7 @@ bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet,
     references["dL"] = dL;
     references["L"] = L;
     references["cop"] = cop;
+    references["tau"] = tau;
 
     return references;
 }
