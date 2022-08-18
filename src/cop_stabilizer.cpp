@@ -487,6 +487,7 @@ void CopStabilizer::stabilizeP_CC(
   // REFERENCE
   const Eigen::Vector2d referenceCCOP(reference_com.head<2>() -
                                       reference_com_acc.head<2>() / w2_);
+  target_cop_ = referenceCCOP;
   const Eigen::Vector2d referenceState_x(reference_com.x(),
                                          reference_com_vel.x());
   const Eigen::Vector2d referenceState_y(reference_com.y(),
@@ -556,7 +557,6 @@ void CopStabilizer::stabilizeP_CC(
   actual_icp << actualState2d_x_(0) + actualState2d_x_(1) / w_,
                 actualState2d_y_(0) + actualState2d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP + non_linear_.head<2>(), 0.;
-  target_cop_ = desired_cop_reference.head<2>();
   desired_cop_computed << actual_command_+ non_linear_.head<2>(), 0.;
 }
 
@@ -579,6 +579,8 @@ void CopStabilizer::stabilizeJerk(
                                   reference_com_acc.y());
   const eVector2 referenceCCOP(reference_com.head<2>() -
                                reference_com_acc.head<2>() / (w2_));
+  target_cop_ = referenceCCOP;
+
   // REAL
   actualState3d_x_ =
       eVector3(actual_com.x(), actual_com_vel.x(), actual_com_acc.x());
@@ -662,7 +664,6 @@ void CopStabilizer::stabilizeJerk(
                 actualState3d_y_(0) + actualState3d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP.x() + non_linear_.x(),
                            referenceCCOP.y() + non_linear_.y(), 0.;
-  target_cop_ = desired_cop_reference.head<2>();
   desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ + non_linear_.x(),
                           nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
 }
