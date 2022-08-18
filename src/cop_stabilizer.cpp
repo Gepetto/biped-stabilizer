@@ -570,6 +570,11 @@ void CopStabilizer::stabilizeJerk(
     eVector3 &desired_cop_reference,  // ???
     eVector3 &desired_cop_computed) {
 
+  target_com_ = reference_com;
+  target_com_vel_ = reference_com_vel;
+  target_com_acc_ = reference_com_acc;
+  target_com_jerk_ = reference_com_jerk;
+
   // REFERENCE
   const eVector3 referenceState_x(reference_com.x(), reference_com_vel.x(),
                                   reference_com_acc.x());
