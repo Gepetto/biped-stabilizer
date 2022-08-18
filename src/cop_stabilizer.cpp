@@ -528,17 +528,15 @@ void CopStabilizer::stabilizeP_CC(
   actual_command_ = (referenceCCOP + feedbackTerm);
 
   getNonLinearPart(actual_com, actual_com_acc, actual_cop, non_linear_);
+  desired_uncampled_cop_ = actual_command_ + non_linear_.head<2>();
 
   if (settings_.saturate_cop) {
-    
-    Eigen::Vector2d COP_unclamped(actual_command_ + non_linear_.head<2>());
     computeSupportPolygon(actual_stance_poses, support_polygon_);
-
-    if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
+    if (!isPointInPolygon(desired_uncampled_cop_, support_polygon_)) {
       // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
       // !");
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
       actual_command_ = COP_clamped - non_linear_.head<2>();
     }
   }
@@ -619,19 +617,18 @@ void CopStabilizer::stabilizeJerk(
                               Bj_ * actual_command_.y());
 
   getNonLinearPart(actual_com, actual_com_acc, actual_cop, non_linear_);
-
+  desired_uncampled_cop_ =  eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
+                                     nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
   if (settings_.saturate_cop) {
-    eVector2 COP_unclamped =
-        eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
-                 nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
+
     computeSupportPolygon(actual_stance_poses, support_polygon_);
 
-    if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
+    if (!isPointInPolygon(desired_uncampled_cop_, support_polygon_)) {
       // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
       // !");
 
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
 
       const eVector3 nextRefState_x(Aj_ * referenceState_x +
                                     Bj_ * reference_com_jerk.x());
