@@ -273,6 +273,14 @@ class CopStabilizer {
 
   void getNonLinearPart(eVector3 &n);
 
+  double estimateCopDisturbance(const eVector2 &currentTrackingError,
+                                eVector2 &oldTrackingError,
+                                const eVector2 &c_gainK);
+
+  double estimateJerkDisturbance(const eVector3& currentTrackingError,
+                                 eVector3& oldTrackingError,
+                                 const eVector3& c_gainK);
+
   bool configured_, first_iter_;
   eMatrixRot A_, Aj_;
   eVector3 B_, Bj_;
@@ -297,7 +305,9 @@ class CopStabilizer {
   eVector2 target_cop_, desired_uncampled_cop_;
   eVector2 errorSum_;
   eVector2 cop_clamped;
-
+  eVector2 oldTrackingError2_x_, oldTrackingError2_y_;
+  eVector3 oldTrackingError_x_, oldTrackingError_y_;
+  eVector2 estimated_disturbance_;
   // Storing data for stable CoMs computations.
   eVector3 actualState3d_x_, actualState3d_y_;
   eVector2 actualState2d_x_, actualState2d_y_;

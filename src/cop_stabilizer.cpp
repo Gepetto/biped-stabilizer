@@ -81,7 +81,13 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   target_com_acc_.setZero();
   non_linear_.setZero();
   target_cop_.setZero();
+  desired_uncampled_cop_.setZero();
   errorSum_.setZero();
+  oldTrackingError2_x_.setZero();
+  oldTrackingError2_y_.setZero();
+  oldTrackingError_x_.setZero();
+  oldTrackingError_y_.setZero();
+  estimated_disturbance_.setZero();
 
   local_foot_description_.resize(4);
   local_foot_description_[0] =
@@ -495,6 +501,10 @@ void CopStabilizer::stabilizeP_CC(
                                              referenceState_x);
   const Eigen::Vector2d stateTrackingError_y(actualState2d_y_ -
                                              referenceState_y);
+
+  estimated_disturbance_[0] = estimateCopDisturbance(stateTrackingError_x, oldTrackingError2_x_, cx_gainK2_);
+  estimated_disturbance_[1] = estimateCopDisturbance(stateTrackingError_y, oldTrackingError2_y_, cy_gainK2_);
+
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK2_.transpose() * stateTrackingError_x,
       cy_gainK2_.transpose() * stateTrackingError_y;
@@ -580,6 +590,10 @@ void CopStabilizer::stabilizeJerk(
                                              referenceState_x);
   const Eigen::Vector3d stateTrackingError_y(actualState3d_y_ -
                                              referenceState_y);
+
+  estimated_disturbance_[0] = estimateJerkDisturbance(stateTrackingError_x, oldTrackingError_x_, cx_gainK_);
+  estimated_disturbance_[1] = estimateJerkDisturbance(stateTrackingError_y, oldTrackingError_y_, cy_gainK_);
+
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
       cy_gainK_.transpose() * stateTrackingError_y;
@@ -789,6 +803,24 @@ bool CopStabilizer::isPointInPolygon(eVector2 &point, Polygon2D &polygon) {
   wykobi_2d_point_.x = point.x();
   wykobi_2d_point_.y = point.y();
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
+}
+
+double CopStabilizer::estimateJerkDisturbance(const eVector3& currentTrackingError,
+                                              eVector3& oldTrackingError,
+                             const eVector3& c_gainK)
+{
+    eVector3 B_ej(currentTrackingError - (A_ + B_*c_gainK.transpose()) *
+                  oldTrackingError);
+    oldTrackingError = currentTrackingError;
+    return ((B_.transpose() * B_ej)/(B_.transpose() * B_))(0);
+}
+
+double CopStabilizer::estimateCopDisturbance(const eVector2 &currentTrackingError, eVector2 &oldTrackingError, const eVector2 &c_gainK)
+{
+    eVector2 B_ej(currentTrackingError - (A22_ + B2_*c_gainK.transpose()) * oldTrackingError);
+    double v = ((B2_.transpose() * B_ej)/(B2_.transpose() * B2_))(0);
+    oldTrackingError = currentTrackingError;
+    return v;
 }
 
 }  // namespace biped_stabilizer
