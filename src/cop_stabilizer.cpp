@@ -98,9 +98,6 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   wykobi_foot_description_.reserve(10 * 4);
   jerk_ma_queue_.clear();
 
-  aig::BipedIGSettings biped_settings = aig::makeSettingsFor("talos"); 
-  accordingIG_ = aig::BipedIG(biped_settings);
-
   // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_X",
   //                   &target_com_[0], &registered_variables_);
   // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_Y",
@@ -710,33 +707,6 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
   }
 }
 
-void CopStabilizer::computeWBreferences(const std::array<eMatrixHom, 3> &LFs,
-                                        const std::array<eMatrixHom, 3> &RFs,
-                                        Eigen::VectorXd &q, 
-                                        Eigen::VectorXd &dq, 
-                                        Eigen::VectorXd &ddq,
-                                        Eigen::VectorXd &tau,
-                                        eVector3 &n,
-                                        eVector3 &dL,       
-                                        eVector3 &cop,       
-                                        eVector3 &L, 
-                                        const double &com_tolerace, 
-                                        const int &max_iterations) {
-  static eVector3 L_AngMoment(0,0,0);
-
-  std::array<eVector3, 3> coms = getStableCoMs(settings_.height);
-  accordingIG_.solve(coms, LFs, RFs, accordingIG_.getQ0(), 
-                     q, dq, ddq, DT_DERIVATIVE, com_tolerace, max_iterations);
-  accordingIG_.set_com_from_waist(q);
-  accordingIG_.computeDynamics(q, dq, ddq);
-  n = eVector3::Zero();
-  n.head<2>() = accordingIG_.getNL();
-  dL = accordingIG_.getAMVariation();
-  L = L_AngMoment + dL * settings_.dt;
-  cop = eVector3::Zero();
-  cop.head<2>() = accordingIG_.getCoP();
-  tau = accordingIG_.getJointTorques();
-}
 
 template <typename T, typename vec_T>
 T CopStabilizer::movingAverage(const T x, const unsigned long nb_samples,

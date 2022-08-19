@@ -40,7 +40,6 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 # Project dependencies
 find_package(Eigen3 REQUIRED)
 find_package(roscpp REQUIRED)
-find_package(aig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 if(BUILD_PYTHON_INTERFACE)
@@ -58,7 +57,7 @@ set(${PROJECT_NAME}_SOURCES
   )
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES} ${${PROJECT_NAME}_HEADERS})
 target_link_libraries(${PROJECT_NAME} Eigen3::Eigen ${roscpp_LIBRARIES})
-target_link_libraries(${PROJECT_NAME} aig::aig)
+target_link_libraries(${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include> ${roscpp_INCLUDE_DIR} ${roscpp_INCLUDE_DIRS})
 if(SUFFIX_SO_VERSION)
   set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})

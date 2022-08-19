@@ -258,51 +258,6 @@ class TestCopStabilizer(unittest.TestCase):
                          desired_1000["dcom"][:2]/w) < 1e-3).all())
         self.assertTrue((np.abs(desired_1000["cop"][:2]) < 1e-3).all())
         
-    def test_compute_wb_references(self):
-        self.settings.cop_control_type = "p_cc"
-        self.settings.cop_p_cc_gain = 3         #the gain used is [k, k/w]
-        self.stab.configure(self.settings)
-        
-        error = [0.02, 0.02]
-        self.arguments["actual_com"][:2] = error
-        self.arguments["actual_cop"][:2] = error
-        
-        desired = stab_loop(self.stab, self.arguments, 1)
-        
-        LFs = [self.arguments["actual_stance_poses"][0]]*3
-        RFs = [self.arguments["actual_stance_poses"][1]]*3
-        com_tolerance = 1e-10
-        max_num_iterations = 20
-        
-        reference = self.stab.compute_wb_references(LFs, RFs, 
-                                                    com_tolerance, 
-                                                    max_num_iterations)
-        pin.centerOfMass(self.model, self.data, reference["q"], 
-                                                reference["dq"], 
-                                                reference["ddq"])
-        reference_com = self.data.com[0]
-        reference_dcom = self.data.vcom[0]
-        reference_ddcom = self.data.acom[0]
-        
-        self.assertTrue((np.abs(reference["cop"] - 
-                                desired["cop"] - 
-                                reference["n"]) < 1e-4).all())
-        self.assertTrue((np.abs(reference_com - desired["com"]) < 1e-4).all())
-        self.assertTrue((np.abs(reference_dcom - desired["dcom"]) < 1e-4).all())
-        self.assertTrue((np.abs(reference_ddcom - desired["ddcom"]) < 1e-3).all())
-        self.assertTrue(reference["dL"].size == 3)
-        self.assertTrue(reference["L"].size == 3)
-        self.assertTrue((np.abs(reference["n"]) < 0.05).all())
-        
-        print("cop_diff", reference["cop"] - desired["cop"] - reference["n"])
-        print("com_diff", reference_com-desired["com"])
-        print("dcom_diff", reference_dcom-desired["dcom"])
-        print("ddcom_diff", reference_ddcom-desired["ddcom"])
-        
-        print("dL: ", reference["dL"])
-        print("L:  ", reference["L"])
-        print("n", reference["n"], desired["n"])
-        
 def stab_loop(tracker, arguments, iterations, printing=False):
     settigs = tracker.get_settings()
     w2 = settigs.g/settigs.height

@@ -18,35 +18,6 @@ void to_std_vector( const bp::object& iterable, std::vector< T, Eigen::aligned_a
         bp::stl_input_iterator< T >( ) );
 }
 
-bp::dict computeWBreferences(CopStabilizer& self, bp::list leftFeet, 
-                                                  bp::list rightFeet,
-                                                  double com_tolerance, 
-                                                  int max_iterations){
-    
-    std::array<eMatrixHom, 3> LFs{ {bp::extract<eMatrixHom>(leftFeet[0]), 
-                                    bp::extract<eMatrixHom>(leftFeet[1]),
-                                    bp::extract<eMatrixHom>(leftFeet[2])} };
-    std::array<eMatrixHom, 3> RFs{ {bp::extract<eMatrixHom>(rightFeet[0]), 
-                                    bp::extract<eMatrixHom>(rightFeet[1]),
-                                    bp::extract<eMatrixHom>(rightFeet[2])} };
-
-    Eigen::VectorXd q, dq, ddq, tau;
-    eVector3 n, dL, cop, L;
-    self.computeWBreferences(LFs, RFs, q, dq, ddq, tau, n, dL, cop, 
-                             L, com_tolerance, max_iterations);
-
-    bp::dict references;
-    references["q"] = q;
-    references["dq"] = dq;
-    references["ddq"] = ddq;
-    references["n"] = n;
-    references["dL"] = dL;
-    references["L"] = L;
-    references["cop"] = cop;
-    references["tau"] = tau;
-
-    return references;
-}
 
 bp::tuple getStableCoMs(CopStabilizer& self, double height){
     
@@ -125,7 +96,6 @@ void exposeCopStabilizer() {
       .def(bp::init<CopStabilizerSettings>())
       .def("configure", &CopStabilizer::configure)
       .def("stabilize", &CopStabilizer_stabilize)
-      .def("compute_wb_references", &computeWBreferences)
       .def("get_stable_coms", &getStableCoMs)
       .def("get_settings", &CopStabilizer::getSettings, bp::return_internal_reference<>())
     ;
