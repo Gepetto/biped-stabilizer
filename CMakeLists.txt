@@ -44,11 +44,9 @@ find_package(aig REQUIRED)
 find_package(Boost REQUIRED COMPONENTS unit_test_framework)
 
 if(BUILD_PYTHON_INTERFACE)
-  FINDPYTHON()
+  find_package(eigenpy 2.7.10 REQUIRED)
   string(REGEX REPLACE "-" "_" PY_NAME ${PROJECT_NAME})
   set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
-  SEARCH_FOR_BOOST_PYTHON()
-  find_package(eigenpy REQUIRED)
 endif()
 
 # Main Library
