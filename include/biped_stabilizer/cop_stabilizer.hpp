@@ -300,14 +300,8 @@ class CopStabilizer {
 
   Eigen::Vector3d old_reference_com_acc_;
   eVector3s jerk_ma_queue_;
-  Eigen::Vector3d target_com_, target_com_vel_, target_com_acc_,
-      target_com_jerk_, non_linear_;
-  eVector2 target_cop_, desired_uncampled_cop_;
-  eVector2 errorSum_;
-  eVector2 cop_clamped;
   eVector2 oldTrackingError2_x_, oldTrackingError2_y_;
   eVector3 oldTrackingError_x_, oldTrackingError_y_;
-  eVector2 estimated_disturbance_;
   // Storing data for stable CoMs computations.
   eVector3 actualState3d_x_, actualState3d_y_;
   eVector2 actualState2d_x_, actualState2d_y_;
@@ -329,6 +323,14 @@ class CopStabilizer {
 
   // Input settings.
   CopStabilizerSettings settings_;
+
+protected:
+  Eigen::Vector3d target_com_, target_com_vel_, target_com_acc_,
+      target_com_jerk_, non_linear_;
+  eVector2 target_cop_, desired_uncampled_cop_;
+  eVector2 errorSum_;
+  eVector2 cop_clamped;
+  eVector2 estimated_disturbance_;
 
 };
 }  // namespace biped_stabilizer
