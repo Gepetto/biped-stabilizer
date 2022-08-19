@@ -81,7 +81,13 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   target_com_acc_.setZero();
   non_linear_.setZero();
   target_cop_.setZero();
+  desired_uncampled_cop_.setZero();
   errorSum_.setZero();
+  oldTrackingError2_x_.setZero();
+  oldTrackingError2_y_.setZero();
+  oldTrackingError_x_.setZero();
+  oldTrackingError_y_.setZero();
+  estimated_disturbance_.setZero();
 
   local_foot_description_.resize(4);
   local_foot_description_[0] =
@@ -481,6 +487,7 @@ void CopStabilizer::stabilizeP_CC(
   // REFERENCE
   const Eigen::Vector2d referenceCCOP(reference_com.head<2>() -
                                       reference_com_acc.head<2>() / w2_);
+  target_cop_ = referenceCCOP;
   const Eigen::Vector2d referenceState_x(reference_com.x(),
                                          reference_com_vel.x());
   const Eigen::Vector2d referenceState_y(reference_com.y(),
@@ -495,6 +502,10 @@ void CopStabilizer::stabilizeP_CC(
                                              referenceState_x);
   const Eigen::Vector2d stateTrackingError_y(actualState2d_y_ -
                                              referenceState_y);
+
+  estimated_disturbance_[0] = estimateCopDisturbance(stateTrackingError_x, oldTrackingError2_x_, cx_gainK2_);
+  estimated_disturbance_[1] = estimateCopDisturbance(stateTrackingError_y, oldTrackingError2_y_, cy_gainK2_);
+
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK2_.transpose() * stateTrackingError_x,
       cy_gainK2_.transpose() * stateTrackingError_y;
@@ -517,17 +528,15 @@ void CopStabilizer::stabilizeP_CC(
   actual_command_ = (referenceCCOP + feedbackTerm);
 
   getNonLinearPart(actual_com, actual_com_acc, actual_cop, non_linear_);
+  desired_uncampled_cop_ = actual_command_ + non_linear_.head<2>();
 
   if (settings_.saturate_cop) {
-    
-    Eigen::Vector2d COP_unclamped(actual_command_ + non_linear_.head<2>());
     computeSupportPolygon(actual_stance_poses, support_polygon_);
-
-    if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
+    if (!isPointInPolygon(desired_uncampled_cop_, support_polygon_)) {
       // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
       // !");
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
       actual_command_ = COP_clamped - non_linear_.head<2>();
     }
   }
@@ -546,7 +555,6 @@ void CopStabilizer::stabilizeP_CC(
   actual_icp << actualState2d_x_(0) + actualState2d_x_(1) / w_,
                 actualState2d_y_(0) + actualState2d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP + non_linear_.head<2>(), 0.;
-  target_cop_ = desired_cop_reference.head<2>();
   desired_cop_computed << actual_command_+ non_linear_.head<2>(), 0.;
 }
 
@@ -562,6 +570,11 @@ void CopStabilizer::stabilizeJerk(
     eVector3 &desired_cop_reference,  // ???
     eVector3 &desired_cop_computed) {
 
+  target_com_ = reference_com;
+  target_com_vel_ = reference_com_vel;
+  target_com_acc_ = reference_com_acc;
+  target_com_jerk_ = reference_com_jerk;
+
   // REFERENCE
   const eVector3 referenceState_x(reference_com.x(), reference_com_vel.x(),
                                   reference_com_acc.x());
@@ -569,6 +582,8 @@ void CopStabilizer::stabilizeJerk(
                                   reference_com_acc.y());
   const eVector2 referenceCCOP(reference_com.head<2>() -
                                reference_com_acc.head<2>() / (w2_));
+  target_cop_ = referenceCCOP;
+
   // REAL
   actualState3d_x_ =
       eVector3(actual_com.x(), actual_com_vel.x(), actual_com_acc.x());
@@ -580,6 +595,10 @@ void CopStabilizer::stabilizeJerk(
                                              referenceState_x);
   const Eigen::Vector3d stateTrackingError_y(actualState3d_y_ -
                                              referenceState_y);
+
+  estimated_disturbance_[0] = estimateJerkDisturbance(stateTrackingError_x, oldTrackingError_x_, cx_gainK_);
+  estimated_disturbance_[1] = estimateJerkDisturbance(stateTrackingError_y, oldTrackingError_y_, cy_gainK_);
+
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
       cy_gainK_.transpose() * stateTrackingError_y;
@@ -603,19 +622,18 @@ void CopStabilizer::stabilizeJerk(
                               Bj_ * actual_command_.y());
 
   getNonLinearPart(actual_com, actual_com_acc, actual_cop, non_linear_);
-
+  desired_uncampled_cop_ =  eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
+                                     nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
   if (settings_.saturate_cop) {
-    eVector2 COP_unclamped =
-        eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
-                 nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
+
     computeSupportPolygon(actual_stance_poses, support_polygon_);
 
-    if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
+    if (!isPointInPolygon(desired_uncampled_cop_, support_polygon_)) {
       // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
       // !");
 
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
 
       const eVector3 nextRefState_x(Aj_ * referenceState_x +
                                     Bj_ * reference_com_jerk.x());
@@ -648,7 +666,6 @@ void CopStabilizer::stabilizeJerk(
                 actualState3d_y_(0) + actualState3d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP.x() + non_linear_.x(),
                            referenceCCOP.y() + non_linear_.y(), 0.;
-  target_cop_ = desired_cop_reference.head<2>();
   desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ + non_linear_.x(),
                           nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
 }
@@ -789,6 +806,24 @@ bool CopStabilizer::isPointInPolygon(eVector2 &point, Polygon2D &polygon) {
   wykobi_2d_point_.x = point.x();
   wykobi_2d_point_.y = point.y();
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
+}
+
+double CopStabilizer::estimateJerkDisturbance(const eVector3& currentTrackingError,
+                                              eVector3& oldTrackingError,
+                             const eVector3& c_gainK)
+{
+    eVector3 B_ej(currentTrackingError - (A_ + B_*c_gainK.transpose()) *
+                  oldTrackingError);
+    oldTrackingError = currentTrackingError;
+    return ((B_.transpose() * B_ej)/(B_.transpose() * B_))(0);
+}
+
+double CopStabilizer::estimateCopDisturbance(const eVector2 &currentTrackingError, eVector2 &oldTrackingError, const eVector2 &c_gainK)
+{
+    eVector2 B_ej(currentTrackingError - (A22_ + B2_*c_gainK.transpose()) * oldTrackingError);
+    double v = ((B2_.transpose() * B_ej)/(B2_.transpose() * B2_))(0);
+    oldTrackingError = currentTrackingError;
+    return v;
 }
 
 }  // namespace biped_stabilizer
