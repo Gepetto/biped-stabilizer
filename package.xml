@@ -2,12 +2,14 @@
 <package format="3">
   <name>biped_stabilizer</name>
   <version>0.0.0</version>
-  <description>This repository contains a stabilizer for biped locomotion.</description>
+  <description>Stabilizer for biped locomotion</description>
   <maintainer email="guilhem.saurel@laas.fr">Guilhem Saurel</maintainer>
-  <author email="guilhem.saurel@laas.fr">Guilhem Saurel</author>
+  <author email="pierre.fernbach@toward.fr">Pierre Fernbach</author>
+  <author email="maximilien.naveau@laas.fr">Maximilien Naveau</author>
+  <author email="nahuel.villa@laas.fr">Nahuel Villa</author>
   <license>BSD</license>
 
-  <url type="website">https://gitlab.laas.fr/gepetto/biped_stabilizer</url>
+  <url type="website">https://github.com/gepetto/biped_stabilizer</url>
 
   <build_depend>git</build_depend>
   <build_depend>doxygen</build_depend>
