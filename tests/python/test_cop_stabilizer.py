@@ -9,7 +9,6 @@ Created on Wed Apr 20 15:38:12 2022
 import biped_stabilizer as bs
 from biped_stabilizer.biped_stabilizer_cpp import eMatrixHom
 import numpy as np
-import pinocchio as pin
 from example_robot_data.robots_loader import load
 
 import unittest
@@ -77,7 +76,7 @@ class TestCopStabilizer(unittest.TestCase):
         w2 = self.settings.g / self.settings.height
         w = np.sqrt(w2)
 
-        ## ~~~~ WITHOUT SATURATION ~~~~ ##
+        # ~~~~ WITHOUT SATURATION ~~~~ ##
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
@@ -98,7 +97,7 @@ class TestCopStabilizer(unittest.TestCase):
         )
         self.assertTrue((desired_1000["cop"][:2] < 1e-6).all())
 
-        ## ~~~~ WITH STABLE SATURATION ~~~~ ##
+        # ~~~~ WITH STABLE SATURATION ~~~~ ##
         error2 = [0.07, 0.12]
         self.arguments["actual_com"][:2] = error2
         self.arguments["actual_cop"][:2] = error2
@@ -121,7 +120,7 @@ class TestCopStabilizer(unittest.TestCase):
         )
         self.assertTrue((desired_1000["cop"][:2] < 1e-4).all())
 
-        ## ~~~~ WITH UNSTABLE SATURATION ~~~~ ##
+        # ~~~~ WITH UNSTABLE SATURATION ~~~~ ##
         error3 = [0.1, 0.14]
         self.arguments["actual_com"][:2] = error3
         self.arguments["actual_cop"][:2] = error3
@@ -151,7 +150,7 @@ class TestCopStabilizer(unittest.TestCase):
         w2 = self.settings.g / self.settings.height
         w = np.sqrt(w2)
 
-        ## ~~~~ WITHOUT SATURATION ~~~~ ##
+        # ~~~~ WITHOUT SATURATION ~~~~ ##
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
@@ -183,7 +182,7 @@ class TestCopStabilizer(unittest.TestCase):
         w2 = self.settings.g / self.settings.height
         w = np.sqrt(w2)
 
-        ## ~~~~ WITHOUT SATURATION ~~~~ ##
+        # ~~~~ WITHOUT SATURATION ~~~~ ##
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
@@ -202,7 +201,7 @@ class TestCopStabilizer(unittest.TestCase):
         )
         self.assertTrue((desired_1000["cop"][:2] < 1e-6).all())
 
-        ## ~~~~ WITH STABLE SATURATION ~~~~ ##
+        # ~~~~ WITH STABLE SATURATION ~~~~ ##
         error2 = [0.07, 0.12]
         self.arguments["actual_com"][:2] = error2
         self.arguments["actual_cop"][:2] = error2
@@ -254,7 +253,7 @@ class TestCopStabilizer(unittest.TestCase):
         w2 = self.settings.g / self.settings.height
         w = np.sqrt(w2)
 
-        ## ~~~~ WITHOUT SATURATION ~~~~ ##
+        # ~~~~ WITHOUT SATURATION ~~~~ ##
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
