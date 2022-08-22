@@ -31,7 +31,7 @@ OBJECTS = $(CPP_SRC:.cpp=.o)
 %.o: %.hpp %.cpp
 	$(COMPILER) $(OPTIONS_LIBS) $*.cpp -o $@
 
-all: $(OBJECTS) wykobi_build 
+all: $(OBJECTS) wykobi_build
 
 wykobi_build : wykobi_build.cpp wykobi.hpp wykobi_math.hpp $(OBJECTS)
 	$(COMPILER) $(OPTIONS) wykobi_build wykobi_build.cpp $(OBJECTS) $(LINKER_OPT)

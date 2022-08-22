@@ -71,4 +71,3 @@ Wykobi Computational Geometry Release Notes
  01. 2D & 3D Geometric routines
 
 ********************************************************************************
-

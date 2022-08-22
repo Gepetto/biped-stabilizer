@@ -19,7 +19,6 @@ CopStabilizer::CopStabilizer(const CopStabilizerSettings &settings)
       jerk_ma_queue_(),
       errorSum_(Eigen::Vector2d::Zero()) {
   configure(settings);
-
 }
 
 CopStabilizer::~CopStabilizer() {}
@@ -35,25 +34,18 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   RotPi_2_ << 0, -1, 1, 0;
   // These system matrices correspond to "dP->CCP" state: c, c_dot, ccop and
   // input ccop_dot
-  A_ << cosh(w_ * dt),      sinh(w_ * dt) / w_, 1 - cosh(w_ * dt),
-        w_ * sinh(w_ * dt), cosh(w_ * dt),     -w_ * sinh(w_ * dt),
-        0,                  0,                  1;
-  B_ << dt - sinh(w_ * dt) / w_,
-        1 - cosh(w_ * dt),
-        dt;
+  A_ << cosh(w_ * dt), sinh(w_ * dt) / w_, 1 - cosh(w_ * dt),
+      w_ * sinh(w_ * dt), cosh(w_ * dt), -w_ * sinh(w_ * dt), 0, 0, 1;
+  B_ << dt - sinh(w_ * dt) / w_, 1 - cosh(w_ * dt), dt;
 
   cx_gainK_ = settings_.cop_x_gains;
   cy_gainK_ = settings_.cop_y_gains;
 
-  A22_ << cosh(w_ * dt),      sinh(w_ * dt) / w_,
-          w_ * sinh(w_ * dt), cosh(w_ * dt);
+  A22_ << cosh(w_ * dt), sinh(w_ * dt) / w_, w_ * sinh(w_ * dt), cosh(w_ * dt);
   B2_ << 1 - cosh(w_ * dt), -w_ * sinh(w_ * dt);
 
-  Aj_ << 1, dt, dt * dt / 2,
-         0,  1, dt,
-         0,  0, 1;
-  Bj_ << dt * dt * dt / 6,
-         dt * dt / 2, dt;
+  Aj_ << 1, dt, dt * dt / 2, 0, 1, dt, 0, 0, 1;
+  Bj_ << dt * dt * dt / 6, dt * dt / 2, dt;
 
   //  cx_gainK2_ << 3.36, 3.36/w;
   //  cy_gainK2_ << 3.36, 3.36/w;
@@ -61,20 +53,17 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   cy_gainK2_ << settings_.cop_p_cc_gain, settings_.cop_p_cc_gain / w_;
 
   // values for J_CCC method
-  S_coms_j_ << 1, dt - DT_DERIVATIVE, pow(dt - DT_DERIVATIVE, 2) / 2,
-               1, dt ,                pow(dt , 2) / 2,
-               1, dt + DT_DERIVATIVE, pow(dt + DT_DERIVATIVE, 2) / 2;
-  U_coms_j_ << pow(dt - DT_DERIVATIVE, 3) / 6,
-               pow(dt, 3) / 6,
-               pow(dt + DT_DERIVATIVE, 3) / 6;
+  S_coms_j_ << 1, dt - DT_DERIVATIVE, pow(dt - DT_DERIVATIVE, 2) / 2, 1, dt,
+      pow(dt, 2) / 2, 1, dt + DT_DERIVATIVE, pow(dt + DT_DERIVATIVE, 2) / 2;
+  U_coms_j_ << pow(dt - DT_DERIVATIVE, 3) / 6, pow(dt, 3) / 6,
+      pow(dt + DT_DERIVATIVE, 3) / 6;
 
   // Values for P_CC method
-  S_coms_ << cosh(w_ * (dt - DT_DERIVATIVE)), sinh(w_ * (dt - DT_DERIVATIVE)) / w_,
-             cosh(w_ * dt),     sinh(w_ * dt) / w_,
-             cosh(w_ * (dt + DT_DERIVATIVE)), sinh(w_ * (dt + DT_DERIVATIVE)) / w_;
-  U_coms_ << 1 - cosh(w_ * (dt - DT_DERIVATIVE)),
-             1 - cosh(w_ * dt),
-             1 - cosh(w_ * (dt + DT_DERIVATIVE));
+  S_coms_ << cosh(w_ * (dt - DT_DERIVATIVE)),
+      sinh(w_ * (dt - DT_DERIVATIVE)) / w_, cosh(w_ * dt), sinh(w_ * dt) / w_,
+      cosh(w_ * (dt + DT_DERIVATIVE)), sinh(w_ * (dt + DT_DERIVATIVE)) / w_;
+  U_coms_ << 1 - cosh(w_ * (dt - DT_DERIVATIVE)), 1 - cosh(w_ * dt),
+      1 - cosh(w_ * (dt + DT_DERIVATIVE));
 
   target_com_.setZero();
   target_com_vel_.setZero();
@@ -143,7 +132,6 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   //                   &errorSum_[0], &registered_variables_);
   // REGISTER_VARIABLE("/introspection_data", "StabilizerErrorSum_Y",
   //                   &errorSum_[1], &registered_variables_);
-
 }
 
 void CopStabilizer::computeSupportPolygon(const eMatrixHoms &stance_poses,
@@ -226,7 +214,7 @@ void CopStabilizer::stabilize(
                              settings_.cop_control_type);
 }
 
-void CopStabilizer::stabilizeCOP(//Not supported
+void CopStabilizer::stabilizeCOP(  // Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
@@ -331,11 +319,11 @@ void CopStabilizer::stabilizeCOP(//Not supported
   desired_com << nextState_x(0), nextState_y(0), reference_com.z();
   desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
   desired_com_acc << w2_ * (nextState_x(0) - nextState_x(2)),
-                     w2_ * (nextState_y(0) - nextState_y(2)), reference_com_acc.z();
+      w2_ * (nextState_y(0) - nextState_y(2)), reference_com_acc.z();
   desired_icp << nextState_x(0) + nextState_x(1) / w_,
-                 nextState_y(0) + nextState_y(1) / w_, 0.;
+      nextState_y(0) + nextState_y(1) / w_, 0.;
   actual_icp << actualState_x(0) + actualState_x(1) / w_,
-                actualState_y(0) + actualState_y(1) / w_, 0.;
+      actualState_y(0) + actualState_y(1) / w_, 0.;
   desired_cop_reference << referenceState_x(2), referenceState_y(2), 0.;
   desired_cop_computed << nextState_x(2), nextState_y(2), 0.;
 
@@ -343,7 +331,7 @@ void CopStabilizer::stabilizeCOP(//Not supported
   old_reference_com_acc_ = reference_com_acc;
 }
 
-void CopStabilizer::stabilizeApproximateAcceleration(//Not supported
+void CopStabilizer::stabilizeApproximateAcceleration(  // Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
@@ -503,15 +491,18 @@ void CopStabilizer::stabilizeP_CC(
   const Eigen::Vector2d stateTrackingError_y(actualState2d_y_ -
                                              referenceState_y);
 
-  estimated_disturbance_[0] = estimateCopDisturbance(stateTrackingError_x, oldTrackingError2_x_, cx_gainK2_);
-  estimated_disturbance_[1] = estimateCopDisturbance(stateTrackingError_y, oldTrackingError2_y_, cy_gainK2_);
+  estimated_disturbance_[0] = estimateCopDisturbance(
+      stateTrackingError_x, oldTrackingError2_x_, cx_gainK2_);
+  estimated_disturbance_[1] = estimateCopDisturbance(
+      stateTrackingError_y, oldTrackingError2_y_, cy_gainK2_);
 
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK2_.transpose() * stateTrackingError_x,
       cy_gainK2_.transpose() * stateTrackingError_y;
 
   if (settings_.use_rate_limited_dcm) {
-    /// @todo create a low pass filter on the DCM (actually not in the DCM, it should be on the feedback signal)
+    /// @todo create a low pass filter on the DCM (actually not in the DCM, it
+    /// should be on the feedback signal)
     // feedbackTerm = rate_limiter->onlineFiltering(feedbackTerm);
   }
 
@@ -536,7 +527,8 @@ void CopStabilizer::stabilizeP_CC(
       // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
       // !");
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_,
+                                 COP_clamped);
       actual_command_ = COP_clamped - non_linear_.head<2>();
     }
   }
@@ -549,13 +541,13 @@ void CopStabilizer::stabilizeP_CC(
   desired_com << nextState_x(0), nextState_y(0), reference_com.z();
   desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
   desired_com_acc << w2_ * (nextState_x(0) - actual_command_.x()),
-                     w2_ * (nextState_y(0) - actual_command_.y()), reference_com_acc.z();
+      w2_ * (nextState_y(0) - actual_command_.y()), reference_com_acc.z();
   desired_icp << nextState_x(0) + nextState_x(1) / w_,
-                 nextState_y(0) + nextState_y(1) / w_, 0.;
+      nextState_y(0) + nextState_y(1) / w_, 0.;
   actual_icp << actualState2d_x_(0) + actualState2d_x_(1) / w_,
-                actualState2d_y_(0) + actualState2d_y_(1) / w_, 0.;
+      actualState2d_y_(0) + actualState2d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP + non_linear_.head<2>(), 0.;
-  desired_cop_computed << actual_command_+ non_linear_.head<2>(), 0.;
+  desired_cop_computed << actual_command_ + non_linear_.head<2>(), 0.;
 }
 
 void CopStabilizer::stabilizeJerk(
@@ -569,7 +561,6 @@ void CopStabilizer::stabilizeJerk(
     eVector3 &actual_icp,             // ???
     eVector3 &desired_cop_reference,  // ???
     eVector3 &desired_cop_computed) {
-
   target_com_ = reference_com;
   target_com_vel_ = reference_com_vel;
   target_com_acc_ = reference_com_acc;
@@ -596,8 +587,10 @@ void CopStabilizer::stabilizeJerk(
   const Eigen::Vector3d stateTrackingError_y(actualState3d_y_ -
                                              referenceState_y);
 
-  estimated_disturbance_[0] = estimateJerkDisturbance(stateTrackingError_x, oldTrackingError_x_, cx_gainK_);
-  estimated_disturbance_[1] = estimateJerkDisturbance(stateTrackingError_y, oldTrackingError_y_, cy_gainK_);
+  estimated_disturbance_[0] = estimateJerkDisturbance(
+      stateTrackingError_x, oldTrackingError_x_, cx_gainK_);
+  estimated_disturbance_[1] = estimateJerkDisturbance(
+      stateTrackingError_y, oldTrackingError_y_, cy_gainK_);
 
   Eigen::Vector2d feedbackTerm;
   feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
@@ -622,10 +615,10 @@ void CopStabilizer::stabilizeJerk(
                               Bj_ * actual_command_.y());
 
   getNonLinearPart(actual_com, actual_com_acc, actual_cop, non_linear_);
-  desired_uncampled_cop_ =  eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
-                                     nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
+  desired_uncampled_cop_ =
+      eVector2(nextState_x(0) - nextState_x(2) / w2_ + non_linear_(0),
+               nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
   if (settings_.saturate_cop) {
-
     computeSupportPolygon(actual_stance_poses, support_polygon_);
 
     if (!isPointInPolygon(desired_uncampled_cop_, support_polygon_)) {
@@ -633,17 +626,17 @@ void CopStabilizer::stabilizeJerk(
       // !");
 
       eVector2 COP_clamped;
-      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_, COP_clamped);
+      projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon_,
+                                 COP_clamped);
 
       const eVector3 nextRefState_x(Aj_ * referenceState_x +
                                     Bj_ * reference_com_jerk.x());
       const eVector3 nextRefState_y(Aj_ * referenceState_y +
                                     Bj_ * reference_com_jerk.y());
-      const eVector2 nextRefCCOP(
-          nextRefState_x(0) - nextRefState_x(2) / w2_,
-          nextRefState_y(0) - nextRefState_y(2) / w2_);
+      const eVector2 nextRefCCOP(nextRefState_x(0) - nextRefState_x(2) / w2_,
+                                 nextRefState_y(0) - nextRefState_y(2) / w2_);
       eVector3 L;
-      L << 1, 0, - 1 / w2_;
+      L << 1, 0, -1 / w2_;
       const eVector2 LA_trErr_0(L.transpose() * Aj_ * stateTrackingError_x,
                                 L.transpose() * Aj_ * stateTrackingError_y);
 
@@ -661,31 +654,27 @@ void CopStabilizer::stabilizeJerk(
   desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
   desired_com_acc << nextState_x(2), nextState_y(2), reference_com_acc.z();
   desired_icp << nextState_x(0) + nextState_x(1) / w_,
-                 nextState_y(0) + nextState_y(1) / w_, 0.;
+      nextState_y(0) + nextState_y(1) / w_, 0.;
   actual_icp << actualState3d_x_(0) + actualState3d_x_(1) / w_,
-                actualState3d_y_(0) + actualState3d_y_(1) / w_, 0.;
+      actualState3d_y_(0) + actualState3d_y_(1) / w_, 0.;
   desired_cop_reference << referenceCCOP.x() + non_linear_.x(),
-                           referenceCCOP.y() + non_linear_.y(), 0.;
-  desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ + non_linear_.x(),
-                          nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
+      referenceCCOP.y() + non_linear_.y(), 0.;
+  desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ +
+                              non_linear_.x(),
+      nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
 }
 
-double CopStabilizer::distributeForces(const eVector2 &desired_cop,
-                                       const eVector2 LF_xy,
-                                       const double LF_force_z,
-                                       const eVector2 LF_torque_xy,
-                                       const eVector2 RF_xy,
-                                       const double RF_force_z,
-                                       const eVector2 RF_torque_xy)
-{
-    Eigen::Vector2d cop_L(LF_xy + RotPi_2_*LF_torque_xy/LF_force_z);
-    Eigen::Vector2d cop_R(RF_xy + RotPi_2_*RF_torque_xy/RF_force_z);
+double CopStabilizer::distributeForces(
+    const eVector2 &desired_cop, const eVector2 LF_xy, const double LF_force_z,
+    const eVector2 LF_torque_xy, const eVector2 RF_xy, const double RF_force_z,
+    const eVector2 RF_torque_xy) {
+  Eigen::Vector2d cop_L(LF_xy + RotPi_2_ * LF_torque_xy / LF_force_z);
+  Eigen::Vector2d cop_R(RF_xy + RotPi_2_ * RF_torque_xy / RF_force_z);
 
-    return (desired_cop - cop_R).norm()/(cop_L - cop_R).norm();
+  return (desired_cop - cop_R).norm() / (cop_L - cop_R).norm();
 }
 
-std::array<eVector3, 3> CopStabilizer::getStableCoMs(
-  const double &com_height) {
+std::array<eVector3, 3> CopStabilizer::getStableCoMs(const double &com_height) {
   if (settings_.cop_control_type == "p_cc") {
     return {{eVector3(S_coms_.block<1, 2>(0, 0) * actualState2d_x_ +
                           U_coms_(0) * actual_command_.x(),
@@ -723,7 +712,6 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(
         "Invalid control type in CopStabilizer::getStableCoMs");
   }
 }
-
 
 template <typename T, typename vec_T>
 T CopStabilizer::movingAverage(const T x, const unsigned long nb_samples,
@@ -786,17 +774,16 @@ void CopStabilizer::getNonLinearPart(const eVector6 &leftFootWrench,
    * robot.
    */
   n << (CoM_acc) / w2_ + (leftFootWrench.block<2, 1>(3, 0) +
-                                 rightFootWrench.block<2, 1>(3, 0) +
-                                 leftFootPlace_c * leftFootWrench(2) +
-                                 rightFootPlace_c * rightFootWrench(2)) /
-                                (leftFootWrench(2) + rightFootWrench(2)),
+                          rightFootWrench.block<2, 1>(3, 0) +
+                          leftFootPlace_c * leftFootWrench(2) +
+                          rightFootPlace_c * rightFootWrench(2)) /
+                             (leftFootWrench(2) + rightFootWrench(2)),
       0;
 }
 
 void CopStabilizer::getNonLinearPart(const eVector3 &com,
                                      const eVector3 &com_acc,
-                                     const eVector3 &cop,
-                                     eVector3 &n) {
+                                     const eVector3 &cop, eVector3 &n) {
   n << cop.head<2>() - (com.head<2>() - (com_acc.head<2>()) / w2_), 0;
 }
 
@@ -808,22 +795,23 @@ bool CopStabilizer::isPointInPolygon(eVector2 &point, Polygon2D &polygon) {
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
 }
 
-double CopStabilizer::estimateJerkDisturbance(const eVector3& currentTrackingError,
-                                              eVector3& oldTrackingError,
-                             const eVector3& c_gainK)
-{
-    eVector3 B_ej(currentTrackingError - (A_ + B_*c_gainK.transpose()) *
-                  oldTrackingError);
-    oldTrackingError = currentTrackingError;
-    return ((B_.transpose() * B_ej)/(B_.transpose() * B_))(0);
+double CopStabilizer::estimateJerkDisturbance(
+    const eVector3 &currentTrackingError, eVector3 &oldTrackingError,
+    const eVector3 &c_gainK) {
+  eVector3 B_ej(currentTrackingError -
+                (A_ + B_ * c_gainK.transpose()) * oldTrackingError);
+  oldTrackingError = currentTrackingError;
+  return ((B_.transpose() * B_ej) / (B_.transpose() * B_))(0);
 }
 
-double CopStabilizer::estimateCopDisturbance(const eVector2 &currentTrackingError, eVector2 &oldTrackingError, const eVector2 &c_gainK)
-{
-    eVector2 B_ej(currentTrackingError - (A22_ + B2_*c_gainK.transpose()) * oldTrackingError);
-    double v = ((B2_.transpose() * B_ej)/(B2_.transpose() * B2_))(0);
-    oldTrackingError = currentTrackingError;
-    return v;
+double CopStabilizer::estimateCopDisturbance(
+    const eVector2 &currentTrackingError, eVector2 &oldTrackingError,
+    const eVector2 &c_gainK) {
+  eVector2 B_ej(currentTrackingError -
+                (A22_ + B2_ * c_gainK.transpose()) * oldTrackingError);
+  double v = ((B2_.transpose() * B_ej) / (B2_.transpose() * B2_))(0);
+  oldTrackingError = currentTrackingError;
+  return v;
 }
 
 }  // namespace biped_stabilizer

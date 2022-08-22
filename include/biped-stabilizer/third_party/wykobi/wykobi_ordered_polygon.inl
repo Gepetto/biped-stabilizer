@@ -17,118 +17,96 @@
 (***********************************************************************)
 */
 
+#include <algorithm>
+#include <deque>
+#include <vector>
 
 #include "wykobi.hpp"
 #include "wykobi_algorithm.hpp"
 
-#include <vector>
-#include <deque>
-#include <algorithm>
+namespace wykobi {
+namespace algorithm {
+template <typename T>
+struct ordered_polygon<point2d<T> > {
+ public:
+  template <typename InputIterator, typename OutputIterator>
+  ordered_polygon(InputIterator begin, InputIterator end, OutputIterator out) {
+    const std::size_t point_count = std::distance(begin, end);
 
+    if (point_count <= 3) {
+      std::copy(begin, end, out);
+      return;
+    }
 
-namespace wykobi
-{
-   namespace algorithm
-   {
-      template <typename T>
-      struct ordered_polygon< point2d<T> >
-      {
-      public:
+    std::vector<o_point> point;
 
-         template <typename InputIterator, typename OutputIterator>
-         ordered_polygon(InputIterator begin, InputIterator end, OutputIterator out)
-         {
-            const std::size_t point_count = std::distance(begin,end);
+    for (InputIterator it = begin; it != end; ++it) {
+      point.push_back(o_point((*it).x, (*it).y, T(0.0)));
+    }
 
-            if (point_count <= 3)
-            {
-               std::copy(begin,end,out);
-               return;
-            }
+    std::size_t j = 0;
 
-            std::vector< o_point > point;
+    for (std::size_t i = 1; i < point.size(); ++i) {
+      if (point[i].y < point[j].y)
+        j = i;
+      else if (point[i].y == point[j].y)
+        if (point[i].x < point[j].x) j = i;
+    }
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               point.push_back(o_point((*it).x,(*it).y,T(0.0)));
-            }
+    std::iter_swap(point.begin(), (point.begin() + j));
 
-            std::size_t j = 0;
+    for (typename std::vector<o_point>::iterator it = ++point.begin();
+         it != point.end(); ++it) {
+      (*it).angle = cartesian_angle(static_cast<point2d<T> >(*it),
+                                    static_cast<point2d<T> >(point.front()));
+    }
 
-            for (std::size_t i = 1; i < point.size(); ++i)
-            {
-               if (point[i].y < point[j].y)
-                  j = i;
-               else if (point[i].y == point[j].y)
-                  if (point[i].x < point[j].x)
-                     j = i;
-            }
+    sort(++point.begin(), point.end(), point_comparator(&point.front()));
 
-            std::iter_swap(point.begin(),(point.begin() + j));
+    for (typename std::vector<o_point>::iterator it = point.begin();
+         it != point.end(); ++it) {
+      (*out++) = make_point<T>((*it).x, (*it).y);
+    }
+  }
 
-            for (typename std::vector< o_point >::iterator it = ++point.begin(); it != point.end(); ++it)
-            {
-               (*it).angle = cartesian_angle(static_cast< point2d<T> >(*it),static_cast<point2d<T> >(point.front()));
-            }
+ private:
+  class o_point : public point2d<T> {
+   public:
+    o_point(const T& _x = T(0.0), const T& _y = T(0.0), const T& _ang = T(0.0))
+        : angle(_ang) {
+      point2d<T>::x = _x;
+      point2d<T>::y = _y;
+    }
 
-            sort(++point.begin(),point.end(),point_comparator(&point.front()));
+    T angle;
+  };
 
-            for (typename std::vector< o_point >::iterator it = point.begin(); it != point.end(); ++it)
-            {
-               (*out++) = make_point<T>((*it).x, (*it).y);
-            }
-         }
+  class point_comparator {
+   public:
+    point_comparator(o_point* _anchor) : anchor(_anchor) {}
 
-      private:
+    bool operator()(const o_point& p1, const o_point& p2) {
+      if (p1.angle < p2.angle)
+        return true;
+      else if (p1.angle > p2.angle)
+        return false;
+      else if (is_equal(static_cast<const point2d<T> >(p1),
+                        static_cast<const point2d<T> >(p2)))
+        return false;
+      else if (lay_distance(static_cast<const point2d<T> >(*anchor),
+                            static_cast<const point2d<T> >(p1)) <
+               lay_distance(static_cast<const point2d<T> >(*anchor),
+                            static_cast<const point2d<T> >(p2)))
+        return true;
+      else
+        return false;
+    }
 
-         class o_point : public point2d<T>
-         {
-         public:
+   private:
+    o_point* anchor;
+  };
+};
 
-            o_point(const T& _x   = T(0.0),
-                    const T& _y   = T(0.0),
-                    const T& _ang = T(0.0))
-            : angle(_ang)
-            {
-               point2d<T>::x = _x;
-               point2d<T>::y = _y;
-            }
+}  // namespace algorithm
 
-            T angle;
-         };
-
-         class point_comparator
-         {
-         public:
-
-            point_comparator(o_point* _anchor)
-            : anchor(_anchor)
-            {}
-
-            bool operator()(const o_point& p1, const o_point& p2)
-            {
-               if (p1.angle < p2.angle)
-                  return true;
-               else if (p1.angle > p2.angle)
-                  return false;
-               else if (is_equal(static_cast< const point2d<T> >(p1),static_cast< const point2d<T> >(p2)))
-                  return false;
-               else if (lay_distance(static_cast< const point2d<T> >(*anchor),
-                                     static_cast< const point2d<T> >(p1)) <
-                        lay_distance(static_cast< const point2d<T> >(*anchor),
-                                     static_cast< const point2d<T> >(p2)))
-                  return true;
-               else
-                 return false;
-            }
-
-         private:
-
-            o_point* anchor;
-         };
-
-      };
-
-   } // namespace wykobi::algorithm
-
-} // namespace wykobi
+}  // namespace wykobi

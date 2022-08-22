@@ -17,177 +17,161 @@
 (***********************************************************************)
 */
 
-
 #include "wykobi.hpp"
 #include "wykobi_algorithm.hpp"
 #include "wykobi_matrix.hpp"
 
+namespace wykobi {
+namespace algorithm {
+template <typename T>
+struct isotropic_normalization<point2d<T> > {
+ public:
+  template <typename InputIterator>
+  isotropic_normalization(InputIterator begin, InputIterator end) {
+    T mean_x = T(0.0);
+    T mean_y = T(0.0);
+    T n = T(1.0 * std::distance(begin, end));
 
-namespace wykobi
-{
-   namespace algorithm
-   {
-      template <typename T>
-      struct isotropic_normalization < point2d<T> >
-      {
-      public:
+    for (InputIterator it = begin; it != end; ++it) {
+      mean_x += (*it).x;
+      mean_y += (*it).y;
+    }
 
-         template <typename InputIterator>
-         isotropic_normalization(InputIterator begin, InputIterator end)
-         {
-            T mean_x = T(0.0);
-            T mean_y = T(0.0);
-            T n      = T(1.0 * std::distance(begin,end));
+    mean_x /= n;
+    mean_y /= n;
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               mean_x += (*it).x;
-               mean_y += (*it).y;
-            }
+    T total_distance = T(0.0);
 
-            mean_x /= n;
-            mean_y /= n;
+    for (InputIterator it = begin; it != end; ++it) {
+      total_distance += sqrt(sqr((*it).x - mean_x) + sqr((*it).y - mean_y));
+    }
 
-            T total_distance = T(0.0);
+    T scale = n * sqrt(T(2.0)) / total_distance;
+    T translate_x = -mean_x * scale;
+    T translate_y = -mean_y * scale;
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               total_distance += sqrt(sqr((*it).x - mean_x) + sqr((*it).y - mean_y));
-            }
+    for (InputIterator it = begin; it != end; ++it) {
+      (*it).x = (*it).x * scale + translate_x;
+      (*it).y = (*it).y * scale + translate_y;
+    }
+  }
+};
 
-            T scale       = n * sqrt(T(2.0)) / total_distance;
-            T translate_x = -mean_x * scale;
-            T translate_y = -mean_y * scale;
+template <typename T>
+struct isotropic_normalization<point3d<T> > {
+ public:
+  template <typename InputIterator>
+  isotropic_normalization(InputIterator begin, InputIterator end) {
+    T mean_x = T(0.0);
+    T mean_y = T(0.0);
+    T mean_z = T(0.0);
+    T n = T(1.0 * std::distance(begin, end));
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               (*it).x = (*it).x * scale + translate_x;
-               (*it).y = (*it).y * scale + translate_y;
-            }
-         }
-      };
+    for (InputIterator it = begin; it != end; ++it) {
+      mean_x += (*it).x;
+      mean_y += (*it).y;
+      mean_z += (*it).z;
+    }
 
-      template <typename T>
-      struct isotropic_normalization < point3d<T> >
-      {
-      public:
+    mean_x /= n;
+    mean_y /= n;
+    mean_z /= n;
 
-         template <typename InputIterator>
-         isotropic_normalization(InputIterator begin, InputIterator end)
-         {
-            T mean_x = T(0.0);
-            T mean_y = T(0.0);
-            T mean_z = T(0.0);
-            T n      = T(1.0 * std::distance(begin,end));
+    T total_distance = T(0.0);
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               mean_x += (*it).x;
-               mean_y += (*it).y;
-               mean_z += (*it).z;
-            }
+    for (InputIterator it = begin; it != end; ++it) {
+      total_distance += sqrt(sqr((*it).x - mean_x) + sqr((*it).y - mean_y) +
+                             sqr((*it).z - mean_z));
+    }
 
-            mean_x /= n;
-            mean_y /= n;
-            mean_z /= n;
+    T scale = n * sqrt(T(2.0)) / total_distance;
+    T translate_x = -mean_x * scale;
+    T translate_y = -mean_y * scale;
+    T translate_z = -mean_z * scale;
 
-            T total_distance = T(0.0);
+    for (InputIterator it = begin; it != end; ++it) {
+      (*it).x = (*it).x * scale + translate_x;
+      (*it).y = (*it).y * scale + translate_y;
+      (*it).z = (*it).z * scale + translate_z;
+    }
+  }
+};
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               total_distance += sqrt(sqr((*it).x - mean_x) + sqr((*it).y - mean_y) + sqr((*it).z - mean_z));
-            }
+template <typename T>
+struct covariance_matrix<point2d<T> > {
+ public:
+  template <typename InputIterator>
+  matrix<T, 2, 2> operator()(InputIterator begin, InputIterator end) {
+    T mean_x = T(0.0);
+    T mean_y = T(0.0);
+    T n = T(1.0 * std::distance(begin, end));
 
-            T scale       = n * sqrt(T(2.0)) / total_distance;
-            T translate_x = -mean_x * scale;
-            T translate_y = -mean_y * scale;
-            T translate_z = -mean_z * scale;
+    for (InputIterator it = begin; it != end; ++it) {
+      mean_x += (*it).x;
+      mean_y += (*it).y;
+    }
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               (*it).x = (*it).x * scale + translate_x;
-               (*it).y = (*it).y * scale + translate_y;
-               (*it).z = (*it).z * scale + translate_z;
-            }
-         }
-      };
+    mean_x /= n;
+    mean_y /= n;
 
-      template <typename T>
-      struct covariance_matrix< point2d<T> >
-      {
-      public:
+    matrix<T, 2, 2> matrix;
 
-         template <typename InputIterator>
-         matrix<T,2,2> operator()(InputIterator begin, InputIterator end)
-         {
-            T mean_x = T(0.0);
-            T mean_y = T(0.0);
-            T n      = T(1.0 * std::distance(begin,end));
+    for (InputIterator it = begin; it != end; ++it) {
+      point2d<T> point = translate(-mean_x, -mean_y, (*it));
+      matrix(0, 0) += (point.x * point.x);
+      matrix(1, 0) += (point.x * point.y);
+      matrix(0, 1) += (point.x * point.y);
+      matrix(1, 1) += (point.y * point.y);
+    }
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               mean_x += (*it).x;
-               mean_y += (*it).y;
-            }
+    matrix /= n;
 
-            mean_x /= n;
-            mean_y /= n;
+    return matrix;
+  }
+};
 
-            matrix<T,2,2> matrix;
+template <typename T>
+struct covariance_matrix<point3d<T> > {
+ public:
+  template <typename InputIterator>
+  matrix<T, 3, 3> operator()(InputIterator begin, InputIterator end) {
+    T mean_x = T(0.0);
+    T mean_y = T(0.0);
+    T mean_z = T(0.0);
+    T n = T(1.0 * std::distance(begin, end));
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               point2d<T> point = translate(-mean_x,-mean_y,(*it));
-               matrix(0,0) += (point.x * point.x); matrix(1,0) += (point.x * point.y);
-               matrix(0,1) += (point.x * point.y); matrix(1,1) += (point.y * point.y);
-            }
+    for (InputIterator it = begin; it != end; ++it) {
+      mean_x += (*it).x;
+      mean_y += (*it).y;
+      mean_z += (*it).z;
+    }
 
-            matrix /= n;
+    mean_x /= n;
+    mean_y /= n;
+    mean_z /= n;
 
-            return matrix;
-         }
-      };
+    matrix<T, 3, 3> matrix;
 
-      template <typename T>
-      struct covariance_matrix< point3d<T> >
-      {
-      public:
-         template <typename InputIterator>
-         matrix<T,3,3> operator()(InputIterator begin, InputIterator end)
-         {
-            T mean_x = T(0.0);
-            T mean_y = T(0.0);
-            T mean_z = T(0.0);
-            T n      = T(1.0 * std::distance(begin,end));
+    for (InputIterator it = begin; it != end; ++it) {
+      point3d<T> point = translate(-mean_x, -mean_y, -mean_z, (*it));
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               mean_x += (*it).x;
-               mean_y += (*it).y;
-               mean_z += (*it).z;
-            }
+      matrix(0, 0) += (point.x * point.x);
+      matrix(1, 0) += (point.x * point.y);
+      matrix(2, 0) += (point.x * point.z);
+      matrix(0, 1) += (point.x * point.y);
+      matrix(1, 1) += (point.y * point.y);
+      matrix(2, 1) += (point.y * point.z);
+      matrix(0, 2) += (point.x * point.z);
+      matrix(1, 2) += (point.y * point.z);
+      matrix(2, 2) += (point.z * point.z);
+    }
 
-            mean_x /= n;
-            mean_y /= n;
-            mean_z /= n;
+    matrix /= n;
 
-            matrix<T,3,3> matrix;
+    return matrix;
+  }
+};
 
-            for (InputIterator it = begin; it != end; ++it)
-            {
-               point3d<T> point = translate(-mean_x,-mean_y,-mean_z,(*it));
+}  // namespace algorithm
 
-               matrix(0,0) += (point.x * point.x); matrix(1,0) += (point.x * point.y); matrix(2,0) += (point.x * point.z);
-               matrix(0,1) += (point.x * point.y); matrix(1,1) += (point.y * point.y); matrix(2,1) += (point.y * point.z);
-               matrix(0,2) += (point.x * point.z); matrix(1,2) += (point.y * point.z); matrix(2,2) += (point.z * point.z);
-            }
-
-            matrix /= n;
-
-            return matrix;
-         }
-      };
-
-   } // namespace wykobi::algorithm
-
-} // namespace wykobi
+}  // namespace wykobi

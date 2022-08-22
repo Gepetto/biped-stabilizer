@@ -17,63 +17,53 @@
 (***********************************************************************)
 */
 
+#include <algorithm>
 
 #include "wykobi.hpp"
 #include "wykobi_algorithm.hpp"
 
-#include <algorithm>
+namespace wykobi {
+namespace algorithm {
+template <typename T>
+struct polygon_triangulate<point2d<T> > {
+ public:
+  template <typename OutputIterator>
+  polygon_triangulate(const polygon<T, 2>& polygon, OutputIterator out) {
+    if (polygon.size() < 3)
+      return;
+    else if (polygon.size() == 3) {
+      (*out++) = make_triangle(polygon[0], polygon[1], polygon[2]);
+      return;
+    }
 
+    wykobi::polygon<T, 2> internal_polygon;
 
-namespace wykobi
-{
-   namespace algorithm
-   {
-      template <typename T>
-      struct polygon_triangulate < point2d<T> >
-      {
-      public:
+    internal_polygon.reserve(polygon.size());
 
-         template <typename OutputIterator>
-         polygon_triangulate(const polygon<T,2>& polygon, OutputIterator out)
-         {
-            if (polygon.size() < 3)
-               return;
-            else if (polygon.size() == 3)
-            {
-               (*out++) = make_triangle(polygon[0], polygon[1], polygon[2]);
-               return;
-            }
+    std::copy(polygon.begin(), polygon.end(),
+              std::back_inserter(internal_polygon));
 
-            wykobi::polygon<T,2> internal_polygon;
+    if (wykobi::polygon_orientation(internal_polygon) != Clockwise) {
+      internal_polygon.reverse();
+    }
 
-            internal_polygon.reserve(polygon.size());
+    while (internal_polygon.size() > 3) {
+      for (std::size_t i = 0; i < internal_polygon.size(); ++i) {
+        if (convex_vertex(i, internal_polygon, Clockwise) &&
+            vertex_is_ear(i, internal_polygon)) {
+          (*out++) = vertex_triangle(i, internal_polygon);
 
-            std::copy(polygon.begin(),polygon.end(),std::back_inserter(internal_polygon));
+          internal_polygon.erase(i);
 
-            if (wykobi::polygon_orientation(internal_polygon) != Clockwise)
-            {
-               internal_polygon.reverse();
-            }
+          break;
+        }
+      }
+    }
 
-            while (internal_polygon.size() > 3)
-            {
-               for (std::size_t i = 0; i < internal_polygon.size(); ++i)
-               {
-                  if (convex_vertex(i,internal_polygon,Clockwise) && vertex_is_ear(i,internal_polygon))
-                  {
-                     (*out++) = vertex_triangle(i,internal_polygon);
+    (*out++) = vertex_triangle(1, internal_polygon);
+  }
+};
 
-                     internal_polygon.erase(i);
+}  // namespace algorithm
 
-                     break;
-                  }
-               }
-            }
-
-            (*out++) = vertex_triangle(1,internal_polygon);
-         }
-      };
-
-   } // namespace wykobi::algorithm
-
-} // namespace wykobi
+}  // namespace wykobi

@@ -17,39 +17,31 @@
 (***********************************************************************)
 */
 
-
 #include "wykobi.hpp"
 #include "wykobi_algorithm.hpp"
 
+namespace wykobi {
+namespace algorithm {
+template <typename T>
+struct remove_duplicates {
+ public:
+  template <typename InputIterator, typename OutputIterator>
+  remove_duplicates(InputIterator begin, InputIterator end,
+                    OutputIterator out) {
+    std::sort(begin, end);
 
-namespace wykobi
-{
-   namespace algorithm
-   {
-      template <typename T>
-      struct remove_duplicates
-      {
-      public:
+    T previous = (*begin);
+    (*out++) = (*begin);
 
-         template <typename InputIterator, typename OutputIterator>
-         remove_duplicates(InputIterator begin, InputIterator end, OutputIterator out)
-         {
-            std::sort(begin,end);
+    for (InputIterator it = (begin + 1); it != end; ++it) {
+      if ((*it) > previous) {
+        (*out++) = (*it);
+        previous = (*it);
+      }
+    }
+  }
+};
 
-            T previous = (*begin);
-              (*out++) = (*begin);
+}  // namespace algorithm
 
-            for (InputIterator it = (begin + 1); it != end; ++it)
-            {
-               if ((*it) > previous)
-               {
-                  (*out++) = (*it);
-                  previous = (*it);
-               }
-            }
-         }
-      };
-
-   } // namespace wykobi::algorithm
-
-} // namespace wykobi
+}  // namespace wykobi

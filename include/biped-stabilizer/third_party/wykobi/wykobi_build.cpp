@@ -17,11 +17,6 @@
 (***********************************************************************)
 */
 
-
 #include "wykobi_instantiate.hpp"
 
-
-int main(void)
-{
-   return 0;
-}
+int main(void) { return 0; }

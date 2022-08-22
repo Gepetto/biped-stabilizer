@@ -17,24 +17,28 @@ set(CUSTOM_HEADER_DIR ${PROJECT_NAME})
 
 # Check if the submodule cmake have been initialized
 set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
-IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
-  IF(${CMAKE_VERSION} VERSION_LESS "3.14.0")
-    MESSAGE(FATAL_ERROR "\nPlease run the following command first:\ngit submodule update --init\n")
-  ELSE()
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
+  if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
+    message(
+      FATAL_ERROR
+        "\nPlease run the following command first:\ngit submodule update --init\n"
+    )
+  else()
     include(FetchContent)
-    FetchContent_Declare("jrl-cmakemodules"
+    FetchContent_Declare(
+      "jrl-cmakemodules"
       GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
     FetchContent_MakeAvailable("jrl-cmakemodules")
     FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
-  ENDIF()
-ENDIF()
+  endif()
+endif()
 
 # JRL-cmakemodule setup
 include("${JRL_CMAKE_MODULES}/base.cmake")
 include("${JRL_CMAKE_MODULES}/boost.cmake")
 
 # Project definition
-COMPUTE_PROJECT_ARGS(PROJECT_ARGS LANGUAGES CXX)
+compute_project_args(PROJECT_ARGS LANGUAGES CXX)
 project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Project dependencies
@@ -55,18 +59,16 @@ if(BUILD_PYTHON_INTERFACE)
 endif()
 
 # Main Library
-set(${PROJECT_NAME}_HEADERS
-  include/${PROJECT_NAME}/cop_stabilizer.hpp
-  )
-set(${PROJECT_NAME}_SOURCES
-  src/cop_stabilizer.cpp
-  )
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES} ${${PROJECT_NAME}_HEADERS})
+set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
+set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
+add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
+                                   ${${PROJECT_NAME}_HEADERS})
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen ${roscpp_LIBRARIES})
-target_include_directories(${PROJECT_NAME} PUBLIC
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-  ${roscpp_INCLUDE_DIR} ${roscpp_INCLUDE_DIRS})
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC $<INSTALL_INTERFACE:include>
+         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> ${roscpp_INCLUDE_DIR}
+         ${roscpp_INCLUDE_DIRS})
 if(SUFFIX_SO_VERSION)
   set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})
 endif()
@@ -83,6 +85,9 @@ endif()
 
 # Installation
 if(NOT INSTALL_PYTHON_INTERFACE_ONLY)
-  install(TARGETS ${PROJECT_NAME} EXPORT ${TARGETS_EXPORT_NAME} DESTINATION lib)
+  install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT ${TARGETS_EXPORT_NAME}
+    DESTINATION lib)
   install(FILES package.xml DESTINATION share/${PROJECT_NAME})
 endif()
