@@ -1,8 +1,8 @@
 
 #include <boost/python.hpp>
 #include <boost/python/return_internal_reference.hpp>
-#include "biped_stabilizer/python.hpp"
-#include "biped_stabilizer/cop_stabilizer.hpp"
+#include "biped-stabilizer/python.hpp"
+#include "biped-stabilizer/cop_stabilizer.hpp"
 
 namespace biped_stabilizer {
 namespace python {
@@ -20,7 +20,7 @@ void to_std_vector( const bp::object& iterable, std::vector< T, Eigen::aligned_a
 
 
 bp::tuple getStableCoMs(CopStabilizer& self, double height){
-    
+
     std::array<eVector3, 3> coms = self.getStableCoMs(height);
     return bp::make_tuple(coms[0], coms[1], coms[2]);
 }
@@ -43,7 +43,7 @@ bp::tuple CopStabilizer_stabilize(
     eVector3 actual_icp;
     eVector3 desired_cop_reference;
     eVector3 desired_cop_computed;
-    
+
     eMatrixHoms actual_stance_poses;
     to_std_vector(args["actual_stance_poses"], actual_stance_poses);
     self.stabilize(actual_com,
@@ -72,7 +72,7 @@ bp::tuple CopStabilizer_stabilize(
 }
 
 void exposeCopStabilizer() {
-      
+
     bp::class_<CopStabilizerSettings>("CopStabilizerSettings")
       .def_readwrite("height", &CopStabilizerSettings::height)
       .def_readwrite("foot_length", &CopStabilizerSettings::foot_length)

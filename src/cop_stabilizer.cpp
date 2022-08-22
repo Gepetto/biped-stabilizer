@@ -1,6 +1,6 @@
-#include "biped_stabilizer/cop_stabilizer.hpp"
+#include "biped-stabilizer/cop_stabilizer.hpp"
 
-#include "biped_stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
+#include "biped-stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
 #include "ros/ros.h"
 
 namespace biped_stabilizer {
@@ -49,8 +49,8 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
           w_ * sinh(w_ * dt), cosh(w_ * dt);
   B2_ << 1 - cosh(w_ * dt), -w_ * sinh(w_ * dt);
 
-  Aj_ << 1, dt, dt * dt / 2, 
-         0,  1, dt, 
+  Aj_ << 1, dt, dt * dt / 2,
+         0,  1, dt,
          0,  0, 1;
   Bj_ << dt * dt * dt / 6,
          dt * dt / 2, dt;
@@ -62,10 +62,10 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
 
   // values for J_CCC method
   S_coms_j_ << 1, dt - DT_DERIVATIVE, pow(dt - DT_DERIVATIVE, 2) / 2,
-               1, dt ,                pow(dt , 2) / 2, 
+               1, dt ,                pow(dt , 2) / 2,
                1, dt + DT_DERIVATIVE, pow(dt + DT_DERIVATIVE, 2) / 2;
   U_coms_j_ << pow(dt - DT_DERIVATIVE, 3) / 6,
-               pow(dt, 3) / 6, 
+               pow(dt, 3) / 6,
                pow(dt + DT_DERIVATIVE, 3) / 6;
 
   // Values for P_CC method
@@ -73,7 +73,7 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
              cosh(w_ * dt),     sinh(w_ * dt) / w_,
              cosh(w_ * (dt + DT_DERIVATIVE)), sinh(w_ * (dt + DT_DERIVATIVE)) / w_;
   U_coms_ << 1 - cosh(w_ * (dt - DT_DERIVATIVE)),
-             1 - cosh(w_ * dt), 
+             1 - cosh(w_ * dt),
              1 - cosh(w_ * (dt + DT_DERIVATIVE));
 
   target_com_.setZero();
@@ -143,7 +143,7 @@ void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   //                   &errorSum_[0], &registered_variables_);
   // REGISTER_VARIABLE("/introspection_data", "StabilizerErrorSum_Y",
   //                   &errorSum_[1], &registered_variables_);
-  
+
 }
 
 void CopStabilizer::computeSupportPolygon(const eMatrixHoms &stance_poses,
@@ -670,11 +670,11 @@ void CopStabilizer::stabilizeJerk(
                           nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
 }
 
-double CopStabilizer::distributeForces(const eVector2 &desired_cop, 
+double CopStabilizer::distributeForces(const eVector2 &desired_cop,
                                        const eVector2 LF_xy,
                                        const double LF_force_z,
                                        const eVector2 LF_torque_xy,
-                                       const eVector2 RF_xy, 
+                                       const eVector2 RF_xy,
                                        const double RF_force_z,
                                        const eVector2 RF_torque_xy)
 {
@@ -795,7 +795,7 @@ void CopStabilizer::getNonLinearPart(const eVector6 &leftFootWrench,
 
 void CopStabilizer::getNonLinearPart(const eVector3 &com,
                                      const eVector3 &com_acc,
-                                     const eVector3 &cop, 
+                                     const eVector3 &cop,
                                      eVector3 &n) {
   n << cop.head<2>() - (com.head<2>() - (com_acc.head<2>()) / w2_), 0;
 }

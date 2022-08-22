@@ -17,7 +17,7 @@
 #include <boost/python/implicit.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include "biped_stabilizer/python.hpp"
+#include "biped-stabilizer/python.hpp"
 
 namespace bp = boost::python;
 namespace biped_stabilizer
