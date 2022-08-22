@@ -11,6 +11,8 @@ set_target_properties(
              PREFIX ""
              SUFFIX ${PYTHON_EXT_SUFFIX})
 
+install(TARGETS ${PY_NAME} DESTINATION ${${PY_NAME}_INSTALL_DIR})
+
 set(PYTHON_SOURCES __init__.py)
 
 foreach(source ${PYTHON_SOURCES})

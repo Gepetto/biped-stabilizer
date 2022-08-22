@@ -12,7 +12,9 @@ option(INSTALL_PYTHON_INTERFACE_ONLY "Install *ONLY* the python bindings" OFF)
 option(SUFFIX_SO_VERSION "Suffix library name with its version" ON)
 
 # Project configuration
-set(PROJECT_USE_CMAKE_EXPORT TRUE)
+if(NOT INSTALL_PYTHON_INTERFACE_ONLY)
+  set(PROJECT_USE_CMAKE_EXPORT TRUE)
+endif()
 set(CUSTOM_HEADER_DIR ${PROJECT_NAME})
 
 # Check if the submodule cmake have been initialized
