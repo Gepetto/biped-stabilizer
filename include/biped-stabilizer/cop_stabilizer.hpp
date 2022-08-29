@@ -184,12 +184,11 @@ class CopStabilizer {
 
   std::array<eVector3, 3> getStableCoMs(const double &com_height);
 
-  void setCOPgains(const eVector3& cop_x_gains, eVector3& cop_y_gains);
+  void setCOPgains(const eVector3 &cop_x_gains, eVector3 &cop_y_gains);
 
   void setPCCgains(const double cop_pcc_gains);
 
-  void setIntegralGains(const eVector2& integral_gains);
-
+  void setIntegralGains(const eVector2 &integral_gains);
 
  private:
   void computeSupportPolygon(const eMatrixHoms &stance_poses,
