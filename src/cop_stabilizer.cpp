@@ -280,7 +280,6 @@ void CopStabilizer::stabilizeCOP(  // Not supported
     computeSupportPolygon(actual_stance_poses, support_polygon_);
 
     if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
-
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
 
