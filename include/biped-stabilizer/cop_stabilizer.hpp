@@ -128,9 +128,22 @@ class CopStabilizer {
                  eVector3 &desired_cop_reference,  // ???
                  eVector3 &desired_cop_computed);
 
+  void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                 const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+                 const Polygon2D &support_polygon,
+                 const eVector3 &reference_com,
+                 const eVector3 &reference_com_vel,
+                 const eVector3 &reference_com_acc,
+                 const eVector3 &reference_com_jerk, eVector3 &desired_com,
+                 eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                 eVector3 &desired_icp,            // ???
+                 eVector3 &actual_icp,             // ???
+                 eVector3 &desired_cop_reference,  // ???
+                 eVector3 &desired_cop_computed);
+
   void stabilizeCOP(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-                    const eMatrixHoms &actual_stance_poses,
+                    const Polygon2D &support_polygon,
                     const eVector3 &reference_com,
                     const eVector3 &reference_com_vel,
                     const eVector3 &reference_com_acc, eVector3 &desired_com,
@@ -143,7 +156,7 @@ class CopStabilizer {
   void stabilizeApproximateAcceleration(
       const eVector3 &actual_com, const eVector3 &actual_com_vel,
       const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-      const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
+      const Polygon2D &support_polygon, const eVector3 &reference_com,
       const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
       eVector3 &desired_com, eVector3 &desired_com_vel,
       eVector3 &desired_com_acc,
@@ -154,7 +167,7 @@ class CopStabilizer {
 
   void stabilizeP_CC(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                      const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-                     const eMatrixHoms &actual_stance_poses,
+                     const Polygon2D &support_polygon,
                      const eVector3 &reference_com,
                      const eVector3 &reference_com_vel,
                      const eVector3 &reference_com_acc, eVector3 &desired_com,
@@ -166,7 +179,7 @@ class CopStabilizer {
 
   void stabilizeJerk(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                      const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-                     const eMatrixHoms &actual_stance_poses,
+                     const Polygon2D &support_polygon,
                      const eVector3 &reference_com,
                      const eVector3 &reference_com_vel,
                      const eVector3 &reference_com_acc,
