@@ -1,7 +1,6 @@
 #include "biped-stabilizer/cop_stabilizer.hpp"
 
 #include "biped-stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
-#include "ros/ros.h"
 
 namespace biped_stabilizer {
 
@@ -26,7 +25,6 @@ CopStabilizer::~CopStabilizer() {}
 void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   settings_ = settings;
   const double &dt = settings_.dt;
-  ROS_INFO_STREAM("Calling CopStabilizer::configure with dt = " << dt);
   configured_ = true;
   first_iter_ = true;
   w2_ = settings_.g / settings_.height;
@@ -282,7 +280,6 @@ void CopStabilizer::stabilizeCOP(  // Not supported
     computeSupportPolygon(actual_stance_poses, support_polygon_);
 
     if (!isPointInPolygon(COP_unclamped, support_polygon_)) {
-      ROS_INFO("Stabilize: unclamped COP not in the support polygon");
 
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(COP_unclamped, support_polygon_, COP_clamped);
@@ -312,7 +309,6 @@ void CopStabilizer::stabilizeCOP(  // Not supported
 
       nextState_x = nextRefState_x + nextStateTrackingError_clamped_x;
       nextState_y = nextRefState_y + nextStateTrackingError_clamped_y;
-      ROS_INFO_STREAM("non linear part: " << non_linear_);
     }
   }
 
@@ -470,7 +466,6 @@ void CopStabilizer::stabilizeP_CC(
 
   if (first_iter_) {
     first_iter_ = false;
-    ROS_INFO_STREAM("First COM target : " << target_com_.transpose());
   }
   // REFERENCE
   const Eigen::Vector2d referenceCCOP(reference_com.head<2>() -
