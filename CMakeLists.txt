@@ -45,7 +45,6 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Project dependencies
 find_package(Eigen3 REQUIRED)
-find_package(roscpp REQUIRED)
 if(BUILD_TESTING)
   find_package(Boost REQUIRED COMPONENTS unit_test_framework)
   if(BUILD_PYTHON_INTERFACE)
@@ -65,12 +64,12 @@ set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
                                    ${${PROJECT_NAME}_HEADERS})
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen ${roscpp_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC $<INSTALL_INTERFACE:include>
-         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> ${roscpp_INCLUDE_DIR}
-         ${roscpp_INCLUDE_DIRS})
+         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+         )
 if(SUFFIX_SO_VERSION)
   set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})
 endif()
