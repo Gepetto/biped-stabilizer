@@ -171,28 +171,26 @@ void CopStabilizer::projectCOPinSupportPolygon(
   }
 }
 
-void CopStabilizer::stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
-               const eVector3 &actual_com_acc, const eVector3 &actual_cop,
-               const eMatrixHoms &actual_stance_poses,
-               const eVector3 &reference_com,
-               const eVector3 &reference_com_vel,
-               const eVector3 &reference_com_acc,
-               const eVector3 &reference_com_jerk, eVector3 &desired_com,
-               eVector3 &desired_com_vel, eVector3 &desired_com_acc,
-               eVector3 &desired_icp,            // ???
-               eVector3 &actual_icp,             // ???
-               eVector3 &desired_cop_reference,  // ???
-               eVector3 &desired_cop_computed){
+void CopStabilizer::stabilize(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,            // ???
+    eVector3 &actual_icp,             // ???
+    eVector3 &desired_cop_reference,  // ???
+    eVector3 &desired_cop_computed) {
   Polygon2D support_polygon;
-  if (settings_.saturate_cop)
-  {
+  if (settings_.saturate_cop) {
     computeSupportPolygon(actual_stance_poses, support_polygon);
-  } // else skip computation to save computation time
+  }  // else skip computation to save computation time
   return stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop,
                    support_polygon, reference_com, reference_com_vel,
                    reference_com_acc, reference_com_jerk, desired_com,
-                   desired_com_vel, desired_com_acc, desired_icp,
-                   actual_icp, desired_cop_reference, desired_cop_computed);
+                   desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+                   desired_cop_reference, desired_cop_computed);
 }
 
 void CopStabilizer::stabilize(
@@ -220,23 +218,22 @@ void CopStabilizer::stabilize(
                          desired_cop_reference, desired_cop_computed);
   else if (settings_.cop_control_type == "approximated_acceleration")
     return stabilizeApproximateAcceleration(
-        actual_com, actual_com_vel, actual_com_acc, actual_cop,
-        support_polygon, reference_com, reference_com_vel,
-        reference_com_acc, desired_com, desired_com_vel, desired_com_acc,
-        desired_icp, actual_icp, desired_cop_reference, desired_cop_computed);
+        actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
+        reference_com, reference_com_vel, reference_com_acc, desired_com,
+        desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+        desired_cop_reference, desired_cop_computed);
   else if (settings_.cop_control_type == "j_ccc")
-    return stabilizeJerk(actual_com, actual_com_vel, actual_com_acc, actual_cop,
-                         support_polygon, reference_com, reference_com_vel,
-                         reference_com_acc, reference_com_jerk, desired_com,
-                         desired_com_vel, desired_com_acc, desired_icp,
-                         actual_icp, desired_cop_reference,
-                         desired_cop_computed);
+    return stabilizeJerk(
+        actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
+        reference_com, reference_com_vel, reference_com_acc, reference_com_jerk,
+        desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+        desired_cop_reference, desired_cop_computed);
   else
     throw std::runtime_error("Invalid cop control type, got : " +
                              settings_.cop_control_type);
 }
 
-void CopStabilizer::stabilizeCOP(// Not supported
+void CopStabilizer::stabilizeCOP(  // Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const Polygon2D &support_polygon, const eVector3 &reference_com,
@@ -350,7 +347,7 @@ void CopStabilizer::stabilizeCOP(// Not supported
   old_reference_com_acc_ = reference_com_acc;
 }
 
-void CopStabilizer::stabilizeApproximateAcceleration(// Not supported
+void CopStabilizer::stabilizeApproximateAcceleration(  // Not supported
     const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const Polygon2D &support_polygon, const eVector3 &reference_com,
@@ -465,7 +462,8 @@ void CopStabilizer::stabilizeApproximateAcceleration(// Not supported
   old_reference_com_acc = reference_com_acc;
 }
 
-void CopStabilizer::stabilizeP_CC(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+void CopStabilizer::stabilizeP_CC(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const Polygon2D &support_polygon, const eVector3 &reference_com,
     const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
@@ -565,7 +563,8 @@ void CopStabilizer::stabilizeP_CC(const eVector3 &actual_com, const eVector3 &ac
   desired_cop_computed << actual_command_ + non_linear_.head<2>(), 0.;
 }
 
-void CopStabilizer::stabilizeJerk(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+void CopStabilizer::stabilizeJerk(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
     const Polygon2D &support_polygon, const eVector3 &reference_com,
     const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
@@ -801,7 +800,8 @@ void CopStabilizer::getNonLinearPart(const eVector3 &com,
 
 void CopStabilizer::getNonLinearPart(eVector3 &n) { n.fill(0.0); }
 
-bool CopStabilizer::isPointInPolygon(const eVector2 &point, const Polygon2D &polygon) {
+bool CopStabilizer::isPointInPolygon(const eVector2 &point,
+                                     const Polygon2D &polygon) {
   wykobi_2d_point_.x = point.x();
   wykobi_2d_point_.y = point.y();
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
