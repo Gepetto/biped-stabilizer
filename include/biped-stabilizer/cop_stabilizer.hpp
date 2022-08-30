@@ -198,7 +198,7 @@ class CopStabilizer {
                                   const Polygon2D &polygon,
                                   eVector2 &target_cop);
 
-  bool isPointInPolygon(eVector2 &point, Polygon2D &polygon);
+  bool isPointInPolygon(const eVector2 &point, const Polygon2D &polygon);
 
   /**
    * @brief getActualCOM_acc compute COM acceleration from the contact forces

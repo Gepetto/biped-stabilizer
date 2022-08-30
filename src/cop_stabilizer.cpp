@@ -783,7 +783,7 @@ void CopStabilizer::getNonLinearPart(const eVector3 &com,
 
 void CopStabilizer::getNonLinearPart(eVector3 &n) { n.fill(0.0); }
 
-bool CopStabilizer::isPointInPolygon(eVector2 &point, Polygon2D &polygon) {
+bool CopStabilizer::isPointInPolygon(const eVector2 &point, const Polygon2D &polygon) {
   wykobi_2d_point_.x = point.x();
   wykobi_2d_point_.y = point.y();
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
