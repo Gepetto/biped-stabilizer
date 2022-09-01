@@ -45,18 +45,19 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Project dependencies
 find_package(Eigen3 REQUIRED)
+
+if(BUILD_PYTHON_INTERFACE)
+  find_package(eigenpy 2.7.12 REQUIRED)
+  string(REGEX REPLACE "-" "_" PY_NAME ${PROJECT_NAME})
+  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
+endif()
+
 if(BUILD_TESTING)
   find_package(Boost REQUIRED COMPONENTS unit_test_framework)
   if(BUILD_PYTHON_INTERFACE)
     find_package(pinocchio REQUIRED)
     find_package(example-robot-data REQUIRED)
   endif()
-endif()
-
-if(BUILD_PYTHON_INTERFACE)
-  find_package(eigenpy 2.7.10 REQUIRED)
-  string(REGEX REPLACE "-" "_" PY_NAME ${PROJECT_NAME})
-  set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
 endif()
 
 # Main Library
