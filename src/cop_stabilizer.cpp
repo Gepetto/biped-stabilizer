@@ -300,7 +300,6 @@ void CopStabilizer::stabilizeCOP(  // Not supported
                                   nextState_y(2) + non_linear_(1));
 
     if (!isPointInPolygon(COP_unclamped, support_polygon)) {
-
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(COP_unclamped, support_polygon, COP_clamped);
 
