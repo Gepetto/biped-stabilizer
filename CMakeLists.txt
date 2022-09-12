@@ -118,3 +118,7 @@ if(NOT INSTALL_PYTHON_INTERFACE_ONLY)
     DESTINATION lib)
   install(FILES package.xml DESTINATION share/${PROJECT_NAME})
 endif()
+
+install(
+  FILES include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt
+  DESTINATION include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt)
