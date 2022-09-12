@@ -60,8 +60,35 @@ if(BUILD_TESTING)
   endif()
 endif()
 
+# Third party dependencies
+set(THIRD_PARTY_HEADERS
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_algorithm.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_axis_projection_descriptor.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_clipping.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_duplicates.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_earclipping.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_graphics_net.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_graphics_opengl.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_graphics_vcl.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_gui.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_hull.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_instantiate.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_math.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_matrix.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_matrix.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_minimum_bounding_ball.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_naive_group_intersections.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_nd.hpp
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_nd.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_normalization.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_ordered_polygon.inl
+    include/${PROJECT_NAME}/third_party/wykobi/wykobi_utilities.hpp)
+
 # Main Library
-set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
+set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp
+                            ${THIRD_PARTY_HEADERS})
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
                                    ${${PROJECT_NAME}_HEADERS})
