@@ -7,7 +7,7 @@ set(PROJECT_DESCRIPTION "Stabilizer for Biped Locomotion")
 set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
 # Project options
-option(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
+option(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
 option(INSTALL_PYTHON_INTERFACE_ONLY "Install *ONLY* the python bindings" OFF)
 option(SUFFIX_SO_VERSION "Suffix library name with its version" ON)
 
