@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>biped_stabilizer</name>
+  <name>biped-stabilizer</name>
   <version>1.2.0</version>
   <description>Stabilizer for biped locomotion</description>
   <maintainer email="guilhem.saurel@laas.fr">Guilhem Saurel</maintainer>
@@ -9,7 +9,7 @@
   <author email="nahuel.villa@laas.fr">Nahuel Villa</author>
   <license>BSD</license>
 
-  <url type="website">https://github.com/gepetto/biped_stabilizer</url>
+  <url type="website">https://github.com/gepetto/biped-stabilizer</url>
 
   <build_depend>git</build_depend>
   <build_depend>doxygen</build_depend>
