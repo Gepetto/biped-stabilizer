@@ -829,10 +829,14 @@ void CopStabilizer::setCOPgains(const eVector3 &cop_x_gains,
                                 eVector3 &cop_y_gains) {
   settings_.cop_x_gains = cop_x_gains;
   settings_.cop_y_gains = cop_y_gains;
+  cx_gainK_ = settings_.cop_x_gains;
+  cy_gainK_ = settings_.cop_y_gains;
 }
 
 void CopStabilizer::setPCCgains(const double cop_pcc_gains) {
   settings_.cop_p_cc_gain = cop_pcc_gains;
+  cx_gainK2_ << settings_.cop_p_cc_gain, settings_.cop_p_cc_gain / w_;
+  cy_gainK2_ << settings_.cop_p_cc_gain, settings_.cop_p_cc_gain / w_;
 }
 
 void CopStabilizer::setIntegralGains(const eVector2 &integral_gains) {
