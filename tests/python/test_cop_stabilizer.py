@@ -316,5 +316,4 @@ def print_loop_results(results, arguments, w2, printing=False):
 
 
 if __name__ == "__main__":
-
     unittest.main()
