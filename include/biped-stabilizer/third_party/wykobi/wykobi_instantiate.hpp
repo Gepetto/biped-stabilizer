@@ -2303,7 +2303,7 @@ namespace wykobi {
       <T>(const vector2d<T>& v1, const vector2d<T>& v2);                       \
   template vector3d<T> operator-                                               \
       <T>(const vector3d<T>& v1, const vector3d<T>& v2);                       \
-  template T operator*<T>(const vector2d<T>& v1, const vector2d<T>& v2);       \
+  template T operator* <T>(const vector2d<T>& v1, const vector2d<T>& v2);      \
   template vector3d<T> operator*                                               \
       <T>(const vector3d<T>& v1, const vector3d<T>& v2);                       \
   template T dot_product<T>(const vector2d<T>& v1, const vector2d<T>& v2);     \
@@ -2312,14 +2312,14 @@ namespace wykobi {
                                       const vector2d<T>& v2);                  \
   template T triple_product<T>(const vector3d<T>& v1, const vector3d<T>& v2,   \
                                const vector3d<T>& v3);                         \
-  template vector2d<T> operator*<T>(const vector2d<T>& v1, const T& scale);    \
-  template vector3d<T> operator*<T>(const vector3d<T>& v1, const T& scale);    \
-  template vector2d<T> operator*<T>(const T& scale, const vector2d<T>& v1);    \
-  template vector3d<T> operator*<T>(const T& scale, const vector3d<T>& v1);    \
-  template point2d<T> operator*<T>(const point2d<T>& point, const T& scale);   \
-  template point3d<T> operator*<T>(const point3d<T>& point, const T& scale);   \
-  template point2d<T> operator*<T>(const T& scale, const point2d<T>& point);   \
-  template point3d<T> operator*<T>(const T& scale, const point3d<T>& point);   \
+  template vector2d<T> operator* <T>(const vector2d<T>& v1, const T& scale);   \
+  template vector3d<T> operator* <T>(const vector3d<T>& v1, const T& scale);   \
+  template vector2d<T> operator* <T>(const T& scale, const vector2d<T>& v1);   \
+  template vector3d<T> operator* <T>(const T& scale, const vector3d<T>& v1);   \
+  template point2d<T> operator* <T>(const point2d<T>& point, const T& scale);  \
+  template point3d<T> operator* <T>(const point3d<T>& point, const T& scale);  \
+  template point2d<T> operator* <T>(const T& scale, const point2d<T>& point);  \
+  template point3d<T> operator* <T>(const T& scale, const point3d<T>& point);  \
   template point2d<T> operator+                                                \
       <T>(const point2d<T>& point, const vector2d<T>& v);                      \
   template point2d<T> operator+                                                \
@@ -2757,34 +2757,35 @@ namespace wykobi {
   template T clamp(const T& value, const T& low, const T& high);
 
 #define INSTANTIATE_WYKOBI_UTILITIES_1(T)                               \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const point2d<T>& point);       \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const point3d<T>& point);       \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const ray<T, 2>& ray);          \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const ray<T, 3>& ray);          \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const vector2d<T>& v);          \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const vector3d<T>& v);          \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const circle<T>& circle);       \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const sphere<T>& sphere);       \
-  template std::ostream& operator<< <T>(std::ostream& os,               \
+  template std::ostream& operator<< <T>(std::ostream & os,              \
                                         const rectangle<T>& rectangle); \
-  template std::ostream& operator<< <T>(std::ostream& os, const box<T, 3>& box);
+  template std::ostream& operator<< <T>(std::ostream & os,              \
+                                        const box<T, 3>& box);
 
 #define INSTANTIATE_WYKOBI_UTILITIES_2(T, D)                                \
-  template std::ostream& operator<< <T, D>(std::ostream& os,                \
+  template std::ostream& operator<< <T, D>(std::ostream & os,               \
                                            const segment<T, D>& segment);   \
-  template std::ostream& operator<< <T, D>(std::ostream& os,                \
+  template std::ostream& operator<< <T, D>(std::ostream & os,               \
                                            const line<T, D>& line);         \
-  template std::ostream& operator<< <T, D>(std::ostream& os,                \
+  template std::ostream& operator<< <T, D>(std::ostream & os,               \
                                            const triangle<T, D>& triangle); \
-  template std::ostream& operator<< <T, D>(std::ostream& os,                \
+  template std::ostream& operator<< <T, D>(std::ostream & os,               \
                                            const quadix<T, D>& quadix);
 
 #define INSTANTIATE_WYKOBI_ALGORITHMS(T, K)                                    \
