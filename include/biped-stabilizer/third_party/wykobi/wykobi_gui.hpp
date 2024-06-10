@@ -57,7 +57,7 @@ class wykobi_window {
     }
   }
 
-  virtual ~wykobi_window(){};
+  virtual ~wykobi_window() {};
 
   virtual void keyboard_handler(unsigned char key, int x, int y) {}
   virtual void special_key_handler(int key, int x, int y) {}
