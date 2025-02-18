@@ -1,10 +1,10 @@
 
-#include "biped-stabilizer/cop_stabilizer.hpp"
+#include "biped_stabilizer/cop_stabilizer.hpp"
 
 #include <boost/python.hpp>
 #include <boost/python/return_internal_reference.hpp>
 
-#include "biped-stabilizer/python.hpp"
+#include "biped_stabilizer/python.hpp"
 
 namespace biped_stabilizer {
 namespace python {

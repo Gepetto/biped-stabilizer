@@ -17,7 +17,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "biped-stabilizer/python.hpp"
+#include "biped_stabilizer/python.hpp"
 
 namespace bp = boost::python;
 namespace biped_stabilizer {

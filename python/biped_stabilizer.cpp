@@ -3,8 +3,8 @@
 #include <eigenpy/geometry.hpp>
 #include <eigenpy/memory.hpp>
 
-#include "biped-stabilizer/cop_stabilizer.hpp"
-#include "biped-stabilizer/python.hpp"
+#include "biped_stabilizer/cop_stabilizer.hpp"
+#include "biped_stabilizer/python.hpp"
 
 BOOST_PYTHON_MODULE(biped_stabilizer_cpp) {
   // Enabling eigenpy support, i.e. numpy/eigen compatibility.

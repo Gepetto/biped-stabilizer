@@ -1,6 +1,6 @@
-#include "biped-stabilizer/cop_stabilizer.hpp"
+#include "biped_stabilizer/cop_stabilizer.hpp"
 
-#include "biped-stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
+#include "biped_stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
 
 namespace biped_stabilizer {
 

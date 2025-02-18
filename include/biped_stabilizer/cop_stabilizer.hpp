@@ -13,7 +13,7 @@
 #include <Eigen/Dense>
 #include <vector>
 
-#include "biped-stabilizer/third_party/wykobi/wykobi.hpp"
+#include "biped_stabilizer/third_party/wykobi/wykobi.hpp"
 
 namespace biped_stabilizer {
 
