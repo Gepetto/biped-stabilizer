@@ -117,7 +117,7 @@ public:
 
   virtual ~CopStabilizer();
 
-  void configure(const CopStabilizerSettings & settings);
+  virtual void configure(const CopStabilizerSettings & settings);
 
   const CopStabilizerSettings & getSettings() {return settings_;}
 
