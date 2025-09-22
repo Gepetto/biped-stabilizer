@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.22.1)
 
 # Project properties
 set(PROJECT_NAMESPACE gepetto)
@@ -18,21 +18,24 @@ endif()
 set(CUSTOM_HEADER_DIR ${PROJECT_NAME})
 
 # Check if the submodule cmake have been initialized
-set(JRL_CMAKE_MODULES "${CMAKE_CURRENT_LIST_DIR}/cmake")
-if(NOT EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
-  if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
-    message(
-      FATAL_ERROR
-        "\nPlease run the following command first:\ngit submodule update --init\n"
-    )
-  else()
-    include(FetchContent)
-    FetchContent_Declare(
-      "jrl-cmakemodules"
-      GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
-    FetchContent_MakeAvailable("jrl-cmakemodules")
-    FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
-  endif()
+find_package(jrl-cmakemodules QUIET CONFIG)
+if(jrl-cmakemodules_FOUND)
+  message(STATUS "JRL cmakemodules found on system at ${JRL_CMAKE_MODULES}")
+  get_property(
+    JRL_CMAKE_MODULES
+    TARGET jrl-cmakemodules::jrl-cmakemodules
+    PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+elseif(EXISTS "${CMAKE_SOURCE_DIR}/cmake/base.cmake")
+  message(STATUS "JRL cmakemodules found in the source tree.")
+  set(JRL_CMAKE_MODULES "${CMAKE_SOURCE_DIR}/cmake")
+else()
+  message(STATUS "JRL cmakemodules not found. Let's fetch it.")
+  include(FetchContent)
+  FetchContent_Declare(
+    "jrl-cmakemodules"
+    GIT_REPOSITORY "https://github.com/jrl-umi3218/jrl-cmakemodules.git")
+  FetchContent_MakeAvailable("jrl-cmakemodules")
+  FetchContent_GetProperties("jrl-cmakemodules" SOURCE_DIR JRL_CMAKE_MODULES)
 endif()
 
 # JRL-cmakemodule setup
