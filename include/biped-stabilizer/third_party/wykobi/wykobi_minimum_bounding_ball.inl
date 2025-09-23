@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <random>
 #include <vector>
 
 #include "wykobi.hpp"
@@ -58,7 +59,9 @@ struct randomized_minimum_bounding_ball<point2d<T> > {
 
     std::copy(begin, end, std::back_inserter(point_list));
 
-    std::random_shuffle(point_list.begin(), point_list.end());
+    std::random_device random_device;
+    std::mt19937 random_engine(random_device());
+    std::shuffle(point_list.begin(),point_list.end(),random_engine);
 
     circle = make_circle(*point_list.begin(), *(point_list.begin() + 1));
 
@@ -74,7 +77,9 @@ struct randomized_minimum_bounding_ball<point2d<T> > {
   template <typename InputIterator>
   circle<T> minimum_ball_with_1_point(InputIterator begin, InputIterator end,
                                       const point2d<T>& q) {
-    std::random_shuffle(begin, end);
+    std::random_device random_device;
+    std::mt19937 random_engine(random_device());
+    std::shuffle(begin,end,random_engine);
 
     circle<T> circle = make_circle(q, *begin);
 
@@ -91,7 +96,9 @@ struct randomized_minimum_bounding_ball<point2d<T> > {
   circle<T> minimum_ball_with_2_points(InputIterator begin, InputIterator end,
                                        const point2d<T>& q1,
                                        const point2d<T>& q2) {
-    std::random_shuffle(begin, end);
+    std::random_device random_device;
+    std::mt19937 random_engine(random_device());
+    std::shuffle(begin,end,random_engine);
 
     circle<T> circle = make_circle(q1, q2);
 
