@@ -86,46 +86,6 @@ void CopStabilizer::configure(const CopStabilizerSettings& settings) {
   wykobi_foot_description_.clear();
   wykobi_foot_description_.reserve(10 * 4);
   jerk_ma_queue_.clear();
-
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_X",
-  //                   &target_com_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_Y",
-  //                   &target_com_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMPosition_Z",
-  //                   &target_com_[2], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMVelocity_X",
-  //                   &target_com_vel_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMVelocity_Y",
-  //                   &target_com_vel_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOMVelocity_Z",
-  //                   &target_com_vel_[2], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data",
-  // "StabilizerTargetCOMAcceleration_X",
-  //                   &target_com_acc_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data",
-  // "StabilizerTargetCOMAcceleration_Y",
-  //                   &target_com_acc_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data",
-  // "StabilizerTargetCOMAcceleration_Z",
-  //                   &target_com_acc_[2], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerNonLinearPart_X",
-  //                   &non_linear_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerNonLinearPart_Y",
-  //                   &non_linear_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerNonLinearPart_Z",
-  //                   &non_linear_[2], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOP_X",
-  //                   &target_cop_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerTargetCOP_Y",
-  //                   &target_cop_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerDesiredUnclampedCOP_X",
-  //                   &desired_uncampled_cop_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerDesiredUnclampedCOP_Y",
-  //                   &desired_uncampled_cop_[1], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerErrorSum_X",
-  //                   &errorSum_[0], &registered_variables_);
-  // REGISTER_VARIABLE("/introspection_data", "StabilizerErrorSum_Y",
-  //                   &errorSum_[1], &registered_variables_);
 }
 
 void CopStabilizer::computeSupportPolygon(const eMatrixHoms& stance_poses,
@@ -158,8 +118,6 @@ void CopStabilizer::projectCOPinSupportPolygon(
   if (wykobi::point_in_convex_polygon(wykobi_cop_unclamped_, polygon)) {
     target_cop = target_cop_unclamped;
   } else {
-    // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
-    // !");
     wykobi_cop_clamped_ = wykobi::closest_point_on_polygon_from_point(
         polygon, wykobi_cop_unclamped_);
     target_cop.x() = wykobi_cop_clamped_.x;
@@ -178,6 +136,27 @@ void CopStabilizer::stabilize(
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
+            actual_stance_poses, reference_com, reference_com_vel,
+            reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
+            desired_com_acc, desired_icp, actual_icp,
+            desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilize(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
   Polygon2D support_polygon;
   if (settings_.saturate_cop) {
     computeSupportPolygon(actual_stance_poses, support_polygon);
@@ -200,19 +179,40 @@ void CopStabilizer::stabilize(
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
-  if (settings_.cop_control_type == "cop")
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
+            support_polygon, reference_com, reference_com_vel,
+            reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
+            desired_com_acc, desired_icp, actual_icp,
+            desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilize(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
+  if (settings_.cop_control_type == "cop") {
     return stabilizeCOP(actual_com, actual_com_vel, actual_com_acc, actual_cop,
                         support_polygon, reference_com, reference_com_vel,
                         reference_com_acc, desired_com, desired_com_vel,
                         desired_com_acc, desired_icp, actual_icp,
                         desired_cop_reference, desired_cop_computed);
-  else if (settings_.cop_control_type == "p_cc")
+  } else if (settings_.cop_control_type == "p_cc") {
     return stabilizeP_CC(actual_com, actual_com_vel, actual_com_acc, actual_cop,
                          support_polygon, reference_com, reference_com_vel,
                          reference_com_acc, desired_com, desired_com_vel,
                          desired_com_acc, desired_icp, actual_icp,
                          desired_cop_reference, desired_cop_computed);
-  else if (settings_.cop_control_type == "approximated_acceleration")
+  } else if (settings_.cop_control_type == "approximated_acceleration") {
     return stabilizeApproximateAcceleration(
         actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
         reference_com, reference_com_vel, reference_com_acc, desired_com,
@@ -240,7 +240,26 @@ void CopStabilizer::stabilizeCOP( // Not supported
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
-  // ROS_INFO("Call stabilizeCOP");
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilizeCOP(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
+              support_polygon, reference_com, reference_com_vel, reference_com_acc,
+              desired_com, desired_com_vel, desired_com_acc,
+              desired_icp, actual_icp,
+              desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilizeCOP( // Not supported
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
   if (!configured_) {
     throw std::runtime_error(
         "Stabilizer not initialized, please call the constructor with "
@@ -353,7 +372,27 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
-  // ROS_INFO("Call stabilize approx acceleration");
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilizeApproximateAcceleration(actual_com, actual_com_vel, actual_com_acc,
+                                   actual_cop_2d, support_polygon, reference_com,
+                                   reference_com_vel, reference_com_acc,
+                                   desired_com, desired_com_vel, desired_com_acc,
+                                   desired_icp, actual_icp,
+                                   desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
   if (!configured_) {
     throw std::runtime_error(
         "Stabilizer not initialized, please call the constructor with "
@@ -419,9 +458,6 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
                                   nextState_y(2) + non_linear_(1));
 
     if (!isPointInPolygon(COP_unclamped, support_polygon)) {
-      // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
-      // !");
-
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(COP_unclamped, support_polygon, COP_clamped);
 
@@ -468,7 +504,25 @@ void CopStabilizer::stabilizeP_CC(
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
-  // ROS_INFO("Call stabilizeCCOP");
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilizeP_CC(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
+               support_polygon, reference_com, reference_com_vel, reference_com_acc,
+               desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+               desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilizeP_CC(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
   if (!configured_) {
     throw std::runtime_error(
         "Stabilizer not initialized, please call the constructor with "
@@ -533,8 +587,6 @@ void CopStabilizer::stabilizeP_CC(
 
   if (settings_.saturate_cop) {
     if (!isPointInPolygon(desired_uncampled_cop_, support_polygon)) {
-      // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
-      // !");
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon,
                                  COP_clamped);
@@ -570,6 +622,27 @@ void CopStabilizer::stabilizeJerk(
     eVector3 &actual_icp,            // ???
     eVector3 &desired_cop_reference, // ???
     eVector3 &desired_cop_computed) {
+  eVector2 actual_cop_2d = actual_cop.head<2>();
+  eVector2 desired_cop_reference_2d = desired_cop_reference.head<2>();
+  eVector2 desired_cop_computed_2d = desired_cop_computed.head<2>();
+  stabilizeJerk(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
+               support_polygon, reference_com, reference_com_vel, reference_com_acc,
+               reference_com_jerk, desired_com, desired_com_vel, desired_com_acc,
+               desired_icp, actual_icp,
+               desired_cop_reference_2d, desired_cop_computed_2d);
+}
+
+void CopStabilizer::stabilizeJerk(
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector2 &desired_cop_reference, // ???
+    eVector2 &desired_cop_computed) {
   target_com_ = reference_com;
   target_com_vel_ = reference_com_vel;
   target_com_acc_ = reference_com_acc;
@@ -611,7 +684,7 @@ void CopStabilizer::stabilizeJerk(
   }
 
   if (!settings_.integral_gain.isZero()) {
-    errorSum_ += actual_cop.head<2>() - referenceCCOP;
+    errorSum_ += actual_cop - referenceCCOP;
 
     Eigen::Vector2d integral_signal(
         (settings_.integral_gain.array() * errorSum_.array()).matrix());
@@ -629,9 +702,6 @@ void CopStabilizer::stabilizeJerk(
                nextState_y(0) - nextState_y(2) / w2_ + non_linear_(1));
   if (settings_.saturate_cop) {
     if (!isPointInPolygon(desired_uncampled_cop_, support_polygon)) {
-      // ROS_INFO("[com_control_utils] COP_unclamped not in the support polygon
-      // !");
-
       eVector2 COP_clamped;
       projectCOPinSupportPolygon(desired_uncampled_cop_, support_polygon,
                                  COP_clamped);
@@ -669,6 +739,15 @@ void CopStabilizer::stabilizeJerk(
   desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ +
                               non_linear_.x(),
       nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
+}
+
+double CopStabilizer::distributeForces(
+    const eVector3& desired_cop, const eVector2 LF_xy, const double LF_force_z,
+    const eVector2 LF_torque_xy, const eVector2 RF_xy, const double RF_force_z,
+    const eVector2 RF_torque_xy) {
+  eVector2 desired_cop_2d = desired_cop.head<2>();
+  return distributeForces(desired_cop_2d, LF_xy, LF_force_z, LF_torque_xy, RF_xy,
+                         RF_force_z, RF_torque_xy);
 }
 
 double CopStabilizer::distributeForces(
