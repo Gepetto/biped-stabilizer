@@ -84,8 +84,10 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error
         desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all(),
-                        f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}")
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue(
             (desired["cop"][:2] == self.settings.cop_p_cc_gain * np.array(error)).all()
         )
@@ -161,11 +163,11 @@ class TestCopStabilizer(unittest.TestCase):
 
         self.assertTrue(
             (desired["com"][:2] < error).all(),
-            msg=f"desired['com'][:2]={desired['com'][:2]}, error={error}"
+            msg=f"desired['com'][:2]={desired['com'][:2]}, error={error}",
         )
         self.assertTrue(
             (desired["cop"][:2] > self.settings.cop_p_cc_gain * np.array(error)).all(),
-            msg=f"desired['cop'][:2]={desired['cop'][:2]}, expected>{self.settings.cop_p_cc_gain * np.array(error)}"
+            msg=f"desired['cop'][:2]={desired['cop'][:2]}, expected>{self.settings.cop_p_cc_gain * np.array(error)}",
         )
 
         n = desired["n"]
@@ -195,8 +197,10 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error
         desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all(),
-                        f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}")
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
 
         n = desired["n"]
@@ -267,8 +271,10 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error
         desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all(),
-                        f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}")
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
 
         n = desired["n"]
