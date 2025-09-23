@@ -26,51 +26,51 @@ std::shared_ptr<Eigen::Isometry3d> wrapTransformConstructor() {
   return std::make_shared<Eigen::Isometry3d>(Eigen::Isometry3d::Identity());
 }
 
-Eigen::Vector3d getPoseTranslation(Eigen::Isometry3d& self) {
+Eigen::Vector3d getPoseTranslation(Eigen::Isometry3d &self) {
   return self.translation();
 }
 
-Eigen::Matrix3d getPoseRotation(Eigen::Isometry3d& self) {
+Eigen::Matrix3d getPoseRotation(Eigen::Isometry3d &self) {
   return self.rotation().matrix();
 }
 
-void setPoseTranslation(Eigen::Isometry3d& self,
-                        const Eigen::Vector3d& translation) {
+void setPoseTranslation(Eigen::Isometry3d &self,
+                        const Eigen::Vector3d &translation) {
   self.translation() = translation;
 }
 
-void setPoseRotationQuaternion(Eigen::Isometry3d& self,
-                               const Eigen::Quaterniond& quat) {
+void setPoseRotationQuaternion(Eigen::Isometry3d &self,
+                               const Eigen::Quaterniond &quat) {
   const Eigen::Vector3d trans = self.translation();
   self = quat.matrix();
   self.translation() = trans;
 }
 
-void setPoseRotationMatrix(Eigen::Isometry3d& self,
-                           const Eigen::Matrix3d& rot) {
+void setPoseRotationMatrix(Eigen::Isometry3d &self,
+                           const Eigen::Matrix3d &rot) {
   const Eigen::Vector3d trans = self.translation();
   self = rot;
   self.translation() = trans;
 }
 
-std::ostream& operator<<(std::ostream& os, Eigen::Isometry3d& pose) {
+std::ostream &operator<<(std::ostream &os, Eigen::Isometry3d &pose) {
   os << "Translation : " << pose.translation().transpose() << std::endl
      << "Rotation : " << std::endl
      << pose.rotation().matrix();
   return os;
 }
 
-std::ostream& wrapperDisplayPose(std::ostream& os,
-                                 const Eigen::Isometry3d& pose) {
+std::ostream &wrapperDisplayPose(std::ostream &os,
+                                 const Eigen::Isometry3d &pose) {
   os << "Translation : " << pose.translation().transpose() << std::endl
      << "Rotation : " << std::endl
      << pose.rotation().matrix();
   return os;
 }
 
-void printPose(Eigen::Isometry3d& self) { std::cout << self << std::endl; }
+void printPose(Eigen::Isometry3d &self) { std::cout << self << std::endl; }
 
-std::string toString(Eigen::Isometry3d& self) {
+std::string toString(Eigen::Isometry3d &self) {
   std::ostringstream oss;
   oss << self << std::endl;
   return oss.str();
@@ -98,5 +98,5 @@ void exposeIsometry3d() {
            "set the rotation from a 3d matrix");
 }
 
-}  // namespace python
-}  // namespace biped_stabilizer
+} // namespace python
+} // namespace biped_stabilizer
