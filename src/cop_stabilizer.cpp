@@ -144,14 +144,8 @@ void CopStabilizer::stabilize(
             reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
             desired_com_acc, desired_icp, actual_icp, desired_cop_reference_2d,
             desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
-  std::cout << "desired_cop_reference: " << desired_cop_reference.transpose()
-            << std::endl;
-  std::cout << "desired_cop_computed: " << desired_cop_computed.transpose()
-            << std::endl;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilize(
@@ -195,10 +189,8 @@ void CopStabilizer::stabilize(
             reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
             desired_com_acc, desired_icp, actual_icp, desired_cop_reference_2d,
             desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilize(
@@ -213,29 +205,29 @@ void CopStabilizer::stabilize(
     eVector2 &desired_cop_reference, // ???
     eVector2 &desired_cop_computed) {
   if (settings_.cop_control_type == "cop") {
-    return stabilizeCOP(actual_com, actual_com_vel, actual_com_acc, actual_cop,
-                        support_polygon, reference_com, reference_com_vel,
-                        reference_com_acc, desired_com, desired_com_vel,
-                        desired_com_acc, desired_icp, actual_icp,
-                        desired_cop_reference, desired_cop_computed);
+    stabilizeCOP(actual_com, actual_com_vel, actual_com_acc, actual_cop,
+                 support_polygon, reference_com, reference_com_vel,
+                 reference_com_acc, desired_com, desired_com_vel,
+                 desired_com_acc, desired_icp, actual_icp,
+                 desired_cop_reference, desired_cop_computed);
   } else if (settings_.cop_control_type == "p_cc") {
-    return stabilizeP_CC(actual_com, actual_com_vel, actual_com_acc, actual_cop,
-                         support_polygon, reference_com, reference_com_vel,
-                         reference_com_acc, desired_com, desired_com_vel,
-                         desired_com_acc, desired_icp, actual_icp,
-                         desired_cop_reference, desired_cop_computed);
+    stabilizeP_CC(actual_com, actual_com_vel, actual_com_acc, actual_cop,
+                  support_polygon, reference_com, reference_com_vel,
+                  reference_com_acc, desired_com, desired_com_vel,
+                  desired_com_acc, desired_icp, actual_icp,
+                  desired_cop_reference, desired_cop_computed);
   } else if (settings_.cop_control_type == "approximated_acceleration") {
-    return stabilizeApproximateAcceleration(
-        actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
-        reference_com, reference_com_vel, reference_com_acc, desired_com,
-        desired_com_vel, desired_com_acc, desired_icp, actual_icp,
-        desired_cop_reference, desired_cop_computed);
+    stabilizeApproximateAcceleration(
+      actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
+      reference_com, reference_com_vel, reference_com_acc, desired_com,
+      desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+      desired_cop_reference, desired_cop_computed);
   } else if (settings_.cop_control_type == "j_ccc") {
-    return stabilizeJerk(
-        actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
-        reference_com, reference_com_vel, reference_com_acc, reference_com_jerk,
-        desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
-        desired_cop_reference, desired_cop_computed);
+    stabilizeJerk(
+      actual_com, actual_com_vel, actual_com_acc, actual_cop, support_polygon,
+      reference_com, reference_com_vel, reference_com_acc, reference_com_jerk,
+      desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+      desired_cop_reference, desired_cop_computed);
   } else {
     throw std::runtime_error("Invalid cop control type, got : " +
                              settings_.cop_control_type);
@@ -260,10 +252,8 @@ void CopStabilizer::stabilizeCOP( // Not supported
                reference_com_acc, desired_com, desired_com_vel, desired_com_acc,
                desired_icp, actual_icp, desired_cop_reference_2d,
                desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilizeCOP( // Not supported
@@ -398,10 +388,8 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
       support_polygon, reference_com, reference_com_vel, reference_com_acc,
       desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
       desired_cop_reference_2d, desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
@@ -535,10 +523,8 @@ void CopStabilizer::stabilizeP_CC(
                 reference_com_acc, desired_com, desired_com_vel,
                 desired_com_acc, desired_icp, actual_icp,
                 desired_cop_reference_2d, desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilizeP_CC(
@@ -660,10 +646,8 @@ void CopStabilizer::stabilizeJerk(
                 reference_com_acc, reference_com_jerk, desired_com,
                 desired_com_vel, desired_com_acc, desired_icp, actual_icp,
                 desired_cop_reference_2d, desired_cop_computed_2d);
-  desired_cop_reference.head<2>() = desired_cop_reference_2d;
-  desired_cop_reference.z() = 0.0;
-  desired_cop_computed.head<2>() = desired_cop_reference_2d;
-  desired_cop_computed.z() = 0.0;
+  desired_cop_reference = eVector3(desired_cop_reference_2d.x(), desired_cop_reference_2d.y(), 0.0);
+  desired_cop_computed = eVector3(desired_cop_computed_2d.x(), desired_cop_computed_2d.y(), 0.0);
 }
 
 void CopStabilizer::stabilizeJerk(
@@ -905,7 +889,7 @@ void CopStabilizer::getNonLinearPart(const eVector6 &leftFootWrench,
 void CopStabilizer::getNonLinearPart(const eVector3 &com,
                                      const eVector3 &com_acc,
                                      const eVector2 &cop, eVector3 &n) {
-  n << cop.head<2>() - (com.head<2>() - (com_acc.head<2>()) / w2_), 0;
+  n << cop - (com.head<2>() - (com_acc.head<2>()) / w2_), 0;
 }
 
 void CopStabilizer::getNonLinearPart(eVector3 &n) { n.fill(0.0); }
