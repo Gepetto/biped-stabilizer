@@ -144,6 +144,10 @@ void CopStabilizer::stabilize(
             reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
             desired_com_acc, desired_icp, actual_icp, desired_cop_reference_2d,
             desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilize(
@@ -161,11 +165,11 @@ void CopStabilizer::stabilize(
   if (settings_.saturate_cop) {
     computeSupportPolygon(actual_stance_poses, support_polygon);
   } // else skip computation to save computation time
-  return stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop,
-                   support_polygon, reference_com, reference_com_vel,
-                   reference_com_acc, reference_com_jerk, desired_com,
-                   desired_com_vel, desired_com_acc, desired_icp, actual_icp,
-                   desired_cop_reference, desired_cop_computed);
+  stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop,
+            support_polygon, reference_com, reference_com_vel,
+            reference_com_acc, reference_com_jerk, desired_com,
+            desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+            desired_cop_reference, desired_cop_computed);
 }
 
 void CopStabilizer::stabilize(
@@ -187,6 +191,10 @@ void CopStabilizer::stabilize(
             reference_com_acc, reference_com_jerk, desired_com, desired_com_vel,
             desired_com_acc, desired_icp, actual_icp, desired_cop_reference_2d,
             desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilize(
@@ -248,6 +256,10 @@ void CopStabilizer::stabilizeCOP( // Not supported
                reference_com_acc, desired_com, desired_com_vel, desired_com_acc,
                desired_icp, actual_icp, desired_cop_reference_2d,
                desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilizeCOP( // Not supported
@@ -296,8 +308,8 @@ void CopStabilizer::stabilizeCOP( // Not supported
   Eigen::Vector3d stateTrackingError_x(actualState_x - referenceState_x);
   Eigen::Vector3d stateTrackingError_y(actualState_y - referenceState_y);
   Eigen::Vector2d feedbackTerm;
-  feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
-      cy_gainK_.transpose() * stateTrackingError_y;
+  feedbackTerm.x() = cx_gainK_.transpose() * stateTrackingError_x;
+  feedbackTerm.y() = cy_gainK_.transpose() * stateTrackingError_y;
 
   if (settings_.use_rate_limited_dcm) {
     /// @todo create a low pass filter on the DCM
@@ -347,16 +359,22 @@ void CopStabilizer::stabilizeCOP( // Not supported
     }
   }
 
-  desired_com << nextState_x(0), nextState_y(0), reference_com.z();
-  desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
-  desired_com_acc << w2_ * (nextState_x(0) - nextState_x(2)),
-      w2_ * (nextState_y(0) - nextState_y(2)), reference_com_acc.z();
-  desired_icp << nextState_x(0) + nextState_x(1) / w_,
-      nextState_y(0) + nextState_y(1) / w_, 0.;
-  actual_icp << actualState_x(0) + actualState_x(1) / w_,
-      actualState_y(0) + actualState_y(1) / w_, 0.;
-  desired_cop_reference << referenceState_x(2), referenceState_y(2), 0.;
-  desired_cop_computed << nextState_x(2), nextState_y(2), 0.;
+  desired_com = eVector3(nextState_x(0), nextState_y(0), reference_com.z());
+  desired_com_vel = eVector3(nextState_x(1), nextState_y(1), reference_com_vel.z());
+  desired_com_acc = eVector3(
+    w2_ * (nextState_x(0) - nextState_x(2)),
+    w2_ * (nextState_y(0) - nextState_y(2)),
+    reference_com_acc.z());
+  desired_icp = eVector3(
+    nextState_x(0) + nextState_x(1) / w_,
+    nextState_y(0) + nextState_y(1) / w_,
+    0.);
+  actual_icp = eVector3(
+    actualState_x(0) + actualState_x(1) / w_,
+    actualState_y(0) + actualState_y(1) / w_,
+    0.);
+  desired_cop_reference = eVector2(referenceState_x(2), referenceState_y(2));
+  desired_cop_computed = eVector2(nextState_x(2), nextState_y(2));
 
   // updating old_acc
   old_reference_com_acc_ = reference_com_acc;
@@ -380,6 +398,10 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
       support_polygon, reference_com, reference_com_vel, reference_com_acc,
       desired_com, desired_com_vel, desired_com_acc, desired_icp, actual_icp,
       desired_cop_reference_2d, desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
@@ -428,8 +450,8 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
   Eigen::Vector3d stateTrackingError_x(actualState_x - referenceState_x);
   Eigen::Vector3d stateTrackingError_y(actualState_y - referenceState_y);
   Eigen::Vector2d feedbackTerm;
-  feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
-      cy_gainK_.transpose() * stateTrackingError_y;
+  feedbackTerm.x() = cx_gainK_.transpose() * stateTrackingError_x;
+  feedbackTerm.y() = cy_gainK_.transpose() * stateTrackingError_y;
 
   if (settings_.use_rate_limited_dcm) {
     /// @todo create a low pass filter on the DCM
@@ -478,16 +500,22 @@ void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
     }
   }
 
-  desired_com << nextState_x(0), nextState_y(0), reference_com.z();
-  desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
-  desired_com_acc << w2_ * (nextState_x(0) - nextState_x(2)),
-      w2_ * (nextState_y(0) - nextState_y(2)), reference_com_acc.z();
-  desired_icp << nextState_x(0) + nextState_x(1) / w_,
-      nextState_y(0) + nextState_y(1) / w_, 0.;
-  actual_icp << actualState_x(0) + actualState_x(1) / w_,
-      actualState_y(0) + actualState_y(1) / w_, 0.;
-  desired_cop_reference << referenceState_x(2), referenceState_y(2), 0.;
-  desired_cop_computed << nextState_x(2), nextState_y(2), 0.;
+  desired_com = eVector3(nextState_x(0), nextState_y(0), reference_com.z());
+  desired_com_vel = eVector3(nextState_x(1), nextState_y(1), reference_com_vel.z());
+  desired_com_acc = eVector3(
+    w2_ * (nextState_x(0) - nextState_x(2)),
+    w2_ * (nextState_y(0) - nextState_y(2)),
+    reference_com_acc.z());
+  desired_icp = eVector3(
+    nextState_x(0) + nextState_x(1) / w_,
+    nextState_y(0) + nextState_y(1) / w_,
+    0.);
+  actual_icp = eVector3(
+    actualState_x(0) + actualState_x(1) / w_,
+    actualState_y(0) + actualState_y(1) / w_,
+    0.);
+  desired_cop_reference = eVector2(referenceState_x(2), referenceState_y(2));
+  desired_cop_computed = eVector2(nextState_x(2), nextState_y(2));
 
   // updating old_acc
   old_reference_com_acc = reference_com_acc;
@@ -511,6 +539,10 @@ void CopStabilizer::stabilizeP_CC(
                 reference_com_acc, desired_com, desired_com_vel,
                 desired_com_acc, desired_icp, actual_icp,
                 desired_cop_reference_2d, desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilizeP_CC(
@@ -561,8 +593,8 @@ void CopStabilizer::stabilizeP_CC(
       stateTrackingError_y, oldTrackingError2_y_, cy_gainK2_);
 
   Eigen::Vector2d feedbackTerm;
-  feedbackTerm << cx_gainK2_.transpose() * stateTrackingError_x,
-      cy_gainK2_.transpose() * stateTrackingError_y;
+  feedbackTerm.x() = cx_gainK2_.transpose() * stateTrackingError_x;
+  feedbackTerm.y() = cy_gainK2_.transpose() * stateTrackingError_y;
 
   if (settings_.use_rate_limited_dcm) {
     /// @todo create a low pass filter on the DCM (actually not in the DCM, it
@@ -599,16 +631,22 @@ void CopStabilizer::stabilizeP_CC(
   nextState_x = A22_ * actualState2d_x_ + B2_ * actual_command_.x();
   nextState_y = A22_ * actualState2d_y_ + B2_ * actual_command_.y();
 
-  desired_com << nextState_x(0), nextState_y(0), reference_com.z();
-  desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
-  desired_com_acc << w2_ * (nextState_x(0) - actual_command_.x()),
-      w2_ * (nextState_y(0) - actual_command_.y()), reference_com_acc.z();
-  desired_icp << nextState_x(0) + nextState_x(1) / w_,
-      nextState_y(0) + nextState_y(1) / w_, 0.;
-  actual_icp << actualState2d_x_(0) + actualState2d_x_(1) / w_,
-      actualState2d_y_(0) + actualState2d_y_(1) / w_, 0.;
-  desired_cop_reference << referenceCCOP + non_linear_.head<2>(), 0.;
-  desired_cop_computed << actual_command_ + non_linear_.head<2>(), 0.;
+  desired_com = eVector3(nextState_x(0), nextState_y(0), reference_com.z());
+  desired_com_vel = eVector3(nextState_x(1), nextState_y(1), reference_com_vel.z());
+  desired_com_acc = eVector3(
+    w2_ * (nextState_x(0) - actual_command_.x()),
+    w2_ * (nextState_y(0) - actual_command_.y()),
+    reference_com_acc.z());
+  desired_icp = eVector3(
+    nextState_x(0) + nextState_x(1) / w_,
+    nextState_y(0) + nextState_y(1) / w_,
+    0.);
+  actual_icp = eVector3(
+    actualState2d_x_(0) + actualState2d_x_(1) / w_,
+    actualState2d_y_(0) + actualState2d_y_(1) / w_,
+    0.);
+  desired_cop_reference = referenceCCOP + non_linear_.head<2>();
+  desired_cop_computed = actual_command_ + non_linear_.head<2>();
 }
 
 void CopStabilizer::stabilizeJerk(
@@ -630,6 +668,10 @@ void CopStabilizer::stabilizeJerk(
                 reference_com_acc, reference_com_jerk, desired_com,
                 desired_com_vel, desired_com_acc, desired_icp, actual_icp,
                 desired_cop_reference_2d, desired_cop_computed_2d);
+  desired_cop_reference.head<2>() = desired_cop_reference_2d;
+  desired_cop_reference.z() = 0.0;
+  desired_cop_computed.head<2>() = desired_cop_reference_2d;
+  desired_cop_computed.z() = 0.0;
 }
 
 void CopStabilizer::stabilizeJerk(
@@ -675,8 +717,8 @@ void CopStabilizer::stabilizeJerk(
       stateTrackingError_y, oldTrackingError_y_, cy_gainK_);
 
   Eigen::Vector2d feedbackTerm;
-  feedbackTerm << cx_gainK_.transpose() * stateTrackingError_x,
-      cy_gainK_.transpose() * stateTrackingError_y;
+  feedbackTerm.x() = cx_gainK_.transpose() * stateTrackingError_x;
+  feedbackTerm.y() = cy_gainK_.transpose() * stateTrackingError_y;
 
   if (settings_.use_rate_limited_dcm) {
     /// @todo create a low pass filter on the DCM
@@ -712,8 +754,8 @@ void CopStabilizer::stabilizeJerk(
                                     Bj_ * reference_com_jerk.y());
       const eVector2 nextRefCCOP(nextRefState_x(0) - nextRefState_x(2) / w2_,
                                  nextRefState_y(0) - nextRefState_y(2) / w2_);
-      eVector3 L;
-      L << 1, 0, -1 / w2_;
+      eVector3 L (1, 0, -1 / w2_);
+
       const eVector2 LA_trErr_0(L.transpose() * Aj_ * stateTrackingError_x,
                                 L.transpose() * Aj_ * stateTrackingError_y);
 
@@ -727,18 +769,23 @@ void CopStabilizer::stabilizeJerk(
     }
   }
 
-  desired_com << nextState_x(0), nextState_y(0), reference_com.z();
-  desired_com_vel << nextState_x(1), nextState_y(1), reference_com_vel.z();
-  desired_com_acc << nextState_x(2), nextState_y(2), reference_com_acc.z();
-  desired_icp << nextState_x(0) + nextState_x(1) / w_,
-      nextState_y(0) + nextState_y(1) / w_, 0.;
-  actual_icp << actualState3d_x_(0) + actualState3d_x_(1) / w_,
-      actualState3d_y_(0) + actualState3d_y_(1) / w_, 0.;
-  desired_cop_reference << referenceCCOP.x() + non_linear_.x(),
-      referenceCCOP.y() + non_linear_.y(), 0.;
-  desired_cop_computed << nextState_x(0) - nextState_x(2) / w2_ +
-                              non_linear_.x(),
-      nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y(), 0.;
+  desired_com = eVector3(nextState_x(0), nextState_y(0), reference_com.z());
+  desired_com_vel = eVector3(nextState_x(1), nextState_y(1), reference_com_vel.z());
+  desired_com_acc = eVector3(nextState_x(2), nextState_y(2), reference_com_acc.z());
+  desired_icp = eVector3(
+    nextState_x(0) + nextState_x(1) / w_,
+    nextState_y(0) + nextState_y(1) / w_,
+    0.);
+  actual_icp = eVector3(
+    actualState3d_x_(0) + actualState3d_x_(1) / w_,
+    actualState3d_y_(0) + actualState3d_y_(1) / w_,
+    0.);
+  desired_cop_reference = eVector2(
+    referenceCCOP.x() + non_linear_.x(),
+    referenceCCOP.y() + non_linear_.y());
+  desired_cop_computed = eVector2(
+    nextState_x(0) - nextState_x(2) / w2_ + non_linear_.x(),
+    nextState_y(0) - nextState_y(2) / w2_ + non_linear_.y());
 }
 
 double CopStabilizer::distributeForces(
@@ -756,7 +803,6 @@ double CopStabilizer::distributeForces(
     const eVector2 RF_torque_xy) {
   Eigen::Vector2d cop_L(LF_xy + RotPi_2_ * LF_torque_xy / LF_force_z);
   Eigen::Vector2d cop_R(RF_xy + RotPi_2_ * RF_torque_xy / RF_force_z);
-
   return (desired_cop - cop_R).norm() / (cop_L - cop_R).norm();
 }
 
