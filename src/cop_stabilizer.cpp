@@ -1,5 +1,5 @@
+#include <iostream>
 #include "biped-stabilizer/cop_stabilizer.hpp"
-
 #include "biped-stabilizer/third_party/wykobi/wykobi_algorithm.hpp"
 
 namespace biped_stabilizer {
@@ -148,6 +148,8 @@ void CopStabilizer::stabilize(
   desired_cop_reference.z() = 0.0;
   desired_cop_computed.head<2>() = desired_cop_reference_2d;
   desired_cop_computed.z() = 0.0;
+  std::cout << "desired_cop_reference: " << desired_cop_reference.transpose() << std::endl;
+  std::cout << "desired_cop_computed: " << desired_cop_computed.transpose() << std::endl;
 }
 
 void CopStabilizer::stabilize(
