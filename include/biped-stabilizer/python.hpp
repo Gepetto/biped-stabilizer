@@ -9,7 +9,7 @@ void exposeCopStabilizer();
 
 void exposeIsometry3d();
 
-}  // namespace python
-}  // namespace biped_stabilizer
+} // namespace python
+} // namespace biped_stabilizer
 
 #endif

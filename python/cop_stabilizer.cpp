@@ -12,18 +12,18 @@ namespace python {
 namespace bp = boost::python;
 
 template <typename T>
-inline void to_std_vector(const bp::object& iterable,
-                          std::vector<T, Eigen::aligned_allocator<T> >& out) {
-  out = std::vector<T, Eigen::aligned_allocator<T> >(
+inline void to_std_vector(const bp::object &iterable,
+                          std::vector<T, Eigen::aligned_allocator<T>> &out) {
+  out = std::vector<T, Eigen::aligned_allocator<T>>(
       bp::stl_input_iterator<T>(iterable), bp::stl_input_iterator<T>());
 }
 
-bp::tuple getStableCoMs(CopStabilizer& self, double height) {
+bp::tuple getStableCoMs(CopStabilizer &self, double height) {
   std::array<eVector3, 3> coms = self.getStableCoMs(height);
   return bp::make_tuple(coms[0], coms[1], coms[2]);
 }
 
-bp::tuple CopStabilizer_stabilize(CopStabilizer& self, bp::dict args) {
+bp::tuple CopStabilizer_stabilize(CopStabilizer &self, bp::dict args) {
   eVector3 actual_com = bp::extract<eVector3>(args["actual_com"]);
   eVector3 actual_com_vel = bp::extract<eVector3>(args["actual_com_vel"]);
   eVector3 actual_com_acc = bp::extract<eVector3>(args["actual_com_acc"]);
@@ -83,5 +83,5 @@ void exposeCopStabilizer() {
            bp::return_internal_reference<>());
   return;
 }
-}  // namespace python
-}  // namespace biped_stabilizer
+} // namespace python
+} // namespace biped_stabilizer

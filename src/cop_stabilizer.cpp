@@ -7,24 +7,20 @@ namespace biped_stabilizer {
 const double DT_DERIVATIVE = 1e-4;
 
 CopStabilizer::CopStabilizer()
-    : configured_(false),
-      old_reference_com_acc_(eVector3::Zero()),
-      jerk_ma_queue_(),
-      errorSum_(Eigen::Vector2d::Zero()) {}
+    : configured_(false), old_reference_com_acc_(eVector3::Zero()),
+      jerk_ma_queue_(), errorSum_(Eigen::Vector2d::Zero()) {}
 
-CopStabilizer::CopStabilizer(const CopStabilizerSettings& settings)
-    : configured_(false),
-      old_reference_com_acc_(eVector3::Zero()),
-      jerk_ma_queue_(),
-      errorSum_(Eigen::Vector2d::Zero()) {
+CopStabilizer::CopStabilizer(const CopStabilizerSettings &settings)
+    : configured_(false), old_reference_com_acc_(eVector3::Zero()),
+      jerk_ma_queue_(), errorSum_(Eigen::Vector2d::Zero()) {
   configure(settings);
 }
 
 CopStabilizer::~CopStabilizer() {}
 
-void CopStabilizer::configure(const CopStabilizerSettings& settings) {
+void CopStabilizer::configure(const CopStabilizerSettings &settings) {
   settings_ = settings;
-  const double& dt = settings_.dt;
+  const double &dt = settings_.dt;
   configured_ = true;
   first_iter_ = true;
   w2_ = settings_.g / settings_.height;
@@ -132,8 +128,8 @@ void CopStabilizer::configure(const CopStabilizerSettings& settings) {
   //                   &errorSum_[1], &registered_variables_);
 }
 
-void CopStabilizer::computeSupportPolygon(const eMatrixHoms& stance_poses,
-                                          Polygon2D& convex_hull) {
+void CopStabilizer::computeSupportPolygon(const eMatrixHoms &stance_poses,
+                                          Polygon2D &convex_hull) {
   // Compute the global position of the feet edges.
   foot_description_.clear();
   for (size_t j = 0; j < stance_poses.size(); j++) {
@@ -155,8 +151,8 @@ void CopStabilizer::computeSupportPolygon(const eMatrixHoms& stance_poses,
 }
 
 void CopStabilizer::projectCOPinSupportPolygon(
-    const eVector2& target_cop_unclamped, const Polygon2D& polygon,
-    eVector2& target_cop) {
+    const eVector2 &target_cop_unclamped, const Polygon2D &polygon,
+    eVector2 &target_cop) {
   wykobi_cop_unclamped_.x = target_cop_unclamped.x();
   wykobi_cop_unclamped_.y = target_cop_unclamped.y();
   if (wykobi::point_in_convex_polygon(wykobi_cop_unclamped_, polygon)) {
@@ -172,20 +168,20 @@ void CopStabilizer::projectCOPinSupportPolygon(
 }
 
 void CopStabilizer::stabilize(
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const eMatrixHoms& actual_stance_poses, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    const eVector3& reference_com_jerk, eVector3& desired_com,
-    eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const eMatrixHoms &actual_stance_poses, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   Polygon2D support_polygon;
   if (settings_.saturate_cop) {
     computeSupportPolygon(actual_stance_poses, support_polygon);
-  }  // else skip computation to save computation time
+  } // else skip computation to save computation time
   return stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop,
                    support_polygon, reference_com, reference_com_vel,
                    reference_com_acc, reference_com_jerk, desired_com,
@@ -194,16 +190,16 @@ void CopStabilizer::stabilize(
 }
 
 void CopStabilizer::stabilize(
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const Polygon2D& support_polygon, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    const eVector3& reference_com_jerk, eVector3& desired_com,
-    eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   if (settings_.cop_control_type == "cop")
     return stabilizeCOP(actual_com, actual_com_vel, actual_com_acc, actual_cop,
                         support_polygon, reference_com, reference_com_vel,
@@ -233,23 +229,23 @@ void CopStabilizer::stabilize(
                              settings_.cop_control_type);
 }
 
-void CopStabilizer::stabilizeCOP(  // Not supported
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const Polygon2D& support_polygon, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    eVector3& desired_com, eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+void CopStabilizer::stabilizeCOP( // Not supported
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   // ROS_INFO("Call stabilizeCOP");
   if (!configured_) {
     throw std::runtime_error(
         "Stabilizer not initialized, please call the constructor with "
         "arguments first");
   }
-  const double& dt = settings_.dt;
+  const double &dt = settings_.dt;
 
   target_com_ = reference_com;
   target_com_vel_ = reference_com_vel;
@@ -346,23 +342,23 @@ void CopStabilizer::stabilizeCOP(  // Not supported
   old_reference_com_acc_ = reference_com_acc;
 }
 
-void CopStabilizer::stabilizeApproximateAcceleration(  // Not supported
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const Polygon2D& support_polygon, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    eVector3& desired_com, eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+void CopStabilizer::stabilizeApproximateAcceleration( // Not supported
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   // ROS_INFO("Call stabilize approx acceleration");
   if (!configured_) {
     throw std::runtime_error(
         "Stabilizer not initialized, please call the constructor with "
         "arguments first");
   }
-  const double& dt = settings_.dt;
+  const double &dt = settings_.dt;
 
   target_com_ = reference_com;
   target_com_vel_ = reference_com_vel;
@@ -462,15 +458,15 @@ void CopStabilizer::stabilizeApproximateAcceleration(  // Not supported
 }
 
 void CopStabilizer::stabilizeP_CC(
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const Polygon2D& support_polygon, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    eVector3& desired_com, eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    eVector3 &desired_com, eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   // ROS_INFO("Call stabilizeCCOP");
   if (!configured_) {
     throw std::runtime_error(
@@ -563,16 +559,16 @@ void CopStabilizer::stabilizeP_CC(
 }
 
 void CopStabilizer::stabilizeJerk(
-    const eVector3& actual_com, const eVector3& actual_com_vel,
-    const eVector3& actual_com_acc, const eVector3& actual_cop,
-    const Polygon2D& support_polygon, const eVector3& reference_com,
-    const eVector3& reference_com_vel, const eVector3& reference_com_acc,
-    const eVector3& reference_com_jerk, eVector3& desired_com,
-    eVector3& desired_com_vel, eVector3& desired_com_acc,
-    eVector3& desired_icp,            // ???
-    eVector3& actual_icp,             // ???
-    eVector3& desired_cop_reference,  // ???
-    eVector3& desired_cop_computed) {
+    const eVector3 &actual_com, const eVector3 &actual_com_vel,
+    const eVector3 &actual_com_acc, const eVector3 &actual_cop,
+    const Polygon2D &support_polygon, const eVector3 &reference_com,
+    const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+    const eVector3 &reference_com_jerk, eVector3 &desired_com,
+    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+    eVector3 &desired_icp,           // ???
+    eVector3 &actual_icp,            // ???
+    eVector3 &desired_cop_reference, // ???
+    eVector3 &desired_cop_computed) {
   target_com_ = reference_com;
   target_com_vel_ = reference_com_vel;
   target_com_acc_ = reference_com_acc;
@@ -675,7 +671,7 @@ void CopStabilizer::stabilizeJerk(
 }
 
 double CopStabilizer::distributeForces(
-    const eVector2& desired_cop, const eVector2 LF_xy, const double LF_force_z,
+    const eVector2 &desired_cop, const eVector2 LF_xy, const double LF_force_z,
     const eVector2 LF_torque_xy, const eVector2 RF_xy, const double RF_force_z,
     const eVector2 RF_torque_xy) {
   Eigen::Vector2d cop_L(LF_xy + RotPi_2_ * LF_torque_xy / LF_force_z);
@@ -684,7 +680,7 @@ double CopStabilizer::distributeForces(
   return (desired_cop - cop_R).norm() / (cop_L - cop_R).norm();
 }
 
-std::array<eVector3, 3> CopStabilizer::getStableCoMs(const double& com_height) {
+std::array<eVector3, 3> CopStabilizer::getStableCoMs(const double &com_height) {
   if (settings_.cop_control_type == "p_cc") {
     return {{eVector3(S_coms_.block<1, 2>(0, 0) * actualState2d_x_ +
                           U_coms_(0) * actual_command_.x(),
@@ -725,7 +721,7 @@ std::array<eVector3, 3> CopStabilizer::getStableCoMs(const double& com_height) {
 
 template <typename T, typename vec_T>
 T CopStabilizer::movingAverage(const T x, const unsigned long nb_samples,
-                               vec_T& queue) {
+                               vec_T &queue) {
   if (queue.capacity() < nb_samples) {
     queue.reserve(nb_samples);
   }
@@ -736,18 +732,18 @@ T CopStabilizer::movingAverage(const T x, const unsigned long nb_samples,
     n--;
   }
   T summation = 0 * x;
-  for (T& element : queue) {
+  for (T &element : queue) {
     summation += element;
   }
   return summation / n;
 }
 
 void CopStabilizer::getNonLinearPart(
-    const eVector6& leftFootWrench, const eVector6& rightFootWrench,
-    const Eigen::Vector2d& leftFootPlace, const Eigen::Vector2d& rightFootPlace,
-    const Eigen::Vector2d& CoM, const Eigen::Vector2d& lateral_gravity,
-    const Eigen::Vector2d& externalForce, eVector3& n) {
-  const double& m = settings_.robot_mass;
+    const eVector6 &leftFootWrench, const eVector6 &rightFootWrench,
+    const Eigen::Vector2d &leftFootPlace, const Eigen::Vector2d &rightFootPlace,
+    const Eigen::Vector2d &CoM, const Eigen::Vector2d &lateral_gravity,
+    const Eigen::Vector2d &externalForce, eVector3 &n) {
+  const double &m = settings_.robot_mass;
   Eigen::Vector2d CoM_acc =
       (leftFootWrench.head<2>() + rightFootWrench.head<2>() + externalForce) /
           m +
@@ -759,9 +755,9 @@ void CopStabilizer::getNonLinearPart(
 }
 
 void CopStabilizer::getNonLinearPart(
-    const eVector6& leftFootWrench, const eVector6& rightFootWrench,
-    const Eigen::Vector2d& leftFootPlace, const Eigen::Vector2d& rightFootPlace,
-    const Eigen::Vector2d& CoM, const Eigen::Vector2d& CoM_acc, eVector3& n) {
+    const eVector6 &leftFootWrench, const eVector6 &rightFootWrench,
+    const Eigen::Vector2d &leftFootPlace, const Eigen::Vector2d &rightFootPlace,
+    const Eigen::Vector2d &CoM, const Eigen::Vector2d &CoM_acc, eVector3 &n) {
   /**
    * FeetWrenches are sorted as [force_x, force_y, force_z, torque_x, torque_y,
    * torque_z]
@@ -772,12 +768,12 @@ void CopStabilizer::getNonLinearPart(
                    rightFootPlace_c, CoM_acc, n);
 }
 
-void CopStabilizer::getNonLinearPart(const eVector6& leftFootWrench,
-                                     const eVector6& rightFootWrench,
-                                     const Eigen::Vector2d& leftFootPlace_c,
-                                     const Eigen::Vector2d& rightFootPlace_c,
-                                     const Eigen::Vector2d& CoM_acc,
-                                     eVector3& n) {
+void CopStabilizer::getNonLinearPart(const eVector6 &leftFootWrench,
+                                     const eVector6 &rightFootWrench,
+                                     const Eigen::Vector2d &leftFootPlace_c,
+                                     const Eigen::Vector2d &rightFootPlace_c,
+                                     const Eigen::Vector2d &CoM_acc,
+                                     eVector3 &n) {
   /**
    * FeetWrenches are sorted as [force_x, force_y, force_z, torque_x, torque_y,
    * torque_z] FeetPlaces_c are the feet places measured from the CoM of the
@@ -791,33 +787,35 @@ void CopStabilizer::getNonLinearPart(const eVector6& leftFootWrench,
       0;
 }
 
-void CopStabilizer::getNonLinearPart(const eVector3& com,
-                                     const eVector3& com_acc,
-                                     const eVector3& cop, eVector3& n) {
+void CopStabilizer::getNonLinearPart(const eVector3 &com,
+                                     const eVector3 &com_acc,
+                                     const eVector3 &cop, eVector3 &n) {
   n << cop.head<2>() - (com.head<2>() - (com_acc.head<2>()) / w2_), 0;
 }
 
-void CopStabilizer::getNonLinearPart(eVector3& n) { n.fill(0.0); }
+void CopStabilizer::getNonLinearPart(eVector3 &n) { n.fill(0.0); }
 
-bool CopStabilizer::isPointInPolygon(const eVector2& point,
-                                     const Polygon2D& polygon) {
+bool CopStabilizer::isPointInPolygon(const eVector2 &point,
+                                     const Polygon2D &polygon) {
   wykobi_2d_point_.x = point.x();
   wykobi_2d_point_.y = point.y();
   return wykobi::point_in_convex_polygon(wykobi_2d_point_, polygon);
 }
 
-double CopStabilizer::estimateJerkDisturbance(
-    const eVector3& currentTrackingError, eVector3& oldTrackingError,
-    const eVector3& c_gainK) {
+double
+CopStabilizer::estimateJerkDisturbance(const eVector3 &currentTrackingError,
+                                       eVector3 &oldTrackingError,
+                                       const eVector3 &c_gainK) {
   eVector3 B_ej(currentTrackingError -
                 (A_ + B_ * c_gainK.transpose()) * oldTrackingError);
   oldTrackingError = currentTrackingError;
   return ((B_.transpose() * B_ej) / (B_.transpose() * B_))(0);
 }
 
-double CopStabilizer::estimateCopDisturbance(
-    const eVector2& currentTrackingError, eVector2& oldTrackingError,
-    const eVector2& c_gainK) {
+double
+CopStabilizer::estimateCopDisturbance(const eVector2 &currentTrackingError,
+                                      eVector2 &oldTrackingError,
+                                      const eVector2 &c_gainK) {
   eVector2 B_ej(currentTrackingError -
                 (A22_ + B2_ * c_gainK.transpose()) * oldTrackingError);
   double v = ((B2_.transpose() * B_ej) / (B2_.transpose() * B2_))(0);
@@ -825,8 +823,8 @@ double CopStabilizer::estimateCopDisturbance(
   return v;
 }
 
-void CopStabilizer::setCOPgains(const eVector3& cop_x_gains,
-                                eVector3& cop_y_gains) {
+void CopStabilizer::setCOPgains(const eVector3 &cop_x_gains,
+                                eVector3 &cop_y_gains) {
   settings_.cop_x_gains = cop_x_gains;
   settings_.cop_y_gains = cop_y_gains;
   cx_gainK_ = settings_.cop_x_gains;
@@ -839,8 +837,8 @@ void CopStabilizer::setPCCgains(const double cop_pcc_gains) {
   cy_gainK2_ << settings_.cop_p_cc_gain, settings_.cop_p_cc_gain / w_;
 }
 
-void CopStabilizer::setIntegralGains(const eVector2& integral_gains) {
+void CopStabilizer::setIntegralGains(const eVector2 &integral_gains) {
   settings_.integral_gain = integral_gains;
 }
 
-}  // namespace biped_stabilizer
+} // namespace biped_stabilizer
