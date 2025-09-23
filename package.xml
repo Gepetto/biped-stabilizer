@@ -20,6 +20,7 @@
   <depend condition="$ROS_PYTHON_VERSION == 2">python</depend>
   <depend condition="$ROS_PYTHON_VERSION == 3">python3</depend>
   <depend>boost</depend>
+  <depend>jrl_cmakemodules</depend>
 
   <buildtool_depend>cmake</buildtool_depend>
   <export>
