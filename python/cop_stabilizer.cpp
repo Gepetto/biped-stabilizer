@@ -1,5 +1,5 @@
-#include <iostream>
 #include "biped-stabilizer/cop_stabilizer.hpp"
+#include <iostream>
 
 #include <boost/python.hpp>
 #include <boost/python/return_internal_reference.hpp>
@@ -27,7 +27,7 @@ bp::tuple CopStabilizer_stabilize(CopStabilizer &self, bp::dict args) {
   eVector3 actual_com = bp::extract<eVector3>(args["actual_com"]);
   eVector3 actual_com_vel = bp::extract<eVector3>(args["actual_com_vel"]);
   eVector3 actual_com_acc = bp::extract<eVector3>(args["actual_com_acc"]);
-  
+
   bool is_2d = false;
   eVector3 actual_cop_3d;
   eVector2 actual_cop_2d;
@@ -44,7 +44,7 @@ bp::tuple CopStabilizer_stabilize(CopStabilizer &self, bp::dict args) {
   } else {
     throw std::runtime_error("actual_cop must be of size 2 or 3");
   }
-  
+
   eVector3 reference_com = bp::extract<eVector3>(args["reference_com"]);
   eVector3 reference_com_vel = bp::extract<eVector3>(args["reference_com_vel"]);
   eVector3 reference_com_acc = bp::extract<eVector3>(args["reference_com_acc"]);
@@ -62,28 +62,25 @@ bp::tuple CopStabilizer_stabilize(CopStabilizer &self, bp::dict args) {
 
   eMatrixHoms actual_stance_poses;
   to_std_vector(args["actual_stance_poses"], actual_stance_poses);
-  if (is_2d)
-  {
+  if (is_2d) {
     self.stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop_2d,
-                 actual_stance_poses, reference_com, reference_com_vel,
-                 reference_com_acc, reference_com_jerk, desired_com,
-                 desired_com_vel, desired_com_acc, desired_icp, actual_icp,
-                 desired_cop_reference_2d, desired_cop_computed_2d);
+                   actual_stance_poses, reference_com, reference_com_vel,
+                   reference_com_acc, reference_com_jerk, desired_com,
+                   desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+                   desired_cop_reference_2d, desired_cop_computed_2d);
     return bp::make_tuple(desired_com, desired_com_vel, desired_com_acc,
                           desired_icp, actual_icp, desired_cop_reference_2d,
                           desired_cop_computed_2d);
   } else {
     self.stabilize(actual_com, actual_com_vel, actual_com_acc, actual_cop_3d,
-                 actual_stance_poses, reference_com, reference_com_vel,
-                 reference_com_acc, reference_com_jerk, desired_com,
-                 desired_com_vel, desired_com_acc, desired_icp, actual_icp,
-                 desired_cop_reference_3d, desired_cop_computed_3d);
+                   actual_stance_poses, reference_com, reference_com_vel,
+                   reference_com_acc, reference_com_jerk, desired_com,
+                   desired_com_vel, desired_com_acc, desired_icp, actual_icp,
+                   desired_cop_reference_3d, desired_cop_computed_3d);
     return bp::make_tuple(desired_com, desired_com_vel, desired_com_acc,
                           desired_icp, actual_icp, desired_cop_reference_3d,
                           desired_cop_computed_3d);
   }
-  
-  
 }
 
 void exposeCopStabilizer() {
