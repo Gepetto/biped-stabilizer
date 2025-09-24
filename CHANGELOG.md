@@ -48,8 +48,8 @@ Releases are available on the [github repository](https://github.com/Gepetto/bip
 
 First implementation of the biped-stabilizer.
 
-[Unreleased]: https://github.com/loco-3d/linear-feedback-controller/compare/v1.3.0...HEAD
-[1.3.0]: https://github.com/loco-3d/linear-feedback-controller/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/loco-3d/linear-feedback-controller/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/loco-3d/linear-feedback-controller/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/loco-3d/linear-feedback-controller/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Gepetto/biped-stabilizer/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/Gepetto/biped-stabilizer/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/Gepetto/biped-stabilizer/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/Gepetto/biped-stabilizer/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/Gepetto/biped-stabilizer/releases/tag/v1.0.0
