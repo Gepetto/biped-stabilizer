@@ -40,7 +40,6 @@ endif()
 
 # JRL-cmakemodule setup
 include("${JRL_CMAKE_MODULES}/base.cmake")
-include("${JRL_CMAKE_MODULES}/boost.cmake")
 
 # Project definition
 compute_project_args(PROJECT_ARGS LANGUAGES CXX)
@@ -48,15 +47,23 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Project dependencies
 find_package(Eigen3 REQUIRED)
-
 if(BUILD_PYTHON_INTERFACE)
   find_package(eigenpy 2.7.12 REQUIRED)
   string(REGEX REPLACE "-" "_" PY_NAME ${PROJECT_NAME})
   set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
 endif()
-
 if(BUILD_TESTING)
-  find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+  # Prepare doctest for other targets to use.
+  find_package(doctest QUIET)
+  if(NOT doctest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(
+      doctest
+      GIT_REPOSITORY https://github.com/doctest/doctest.git
+      GIT_TAG master)
+    FetchContent_MakeAvailable(doctest)
+  endif()
+  # Add extra dependencies in case the python interface is built.
   if(BUILD_PYTHON_INTERFACE)
     find_package(pinocchio REQUIRED)
     find_package(example-robot-data REQUIRED)
