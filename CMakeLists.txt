@@ -99,9 +99,9 @@ set(THIRD_PARTY_HEADERS
 # Main Library
 set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
-                                   ${${PROJECT_NAME}_HEADERS}
-                                   ${THIRD_PARTY_HEADERS})
+add_library(
+  ${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES} ${${PROJECT_NAME}_HEADERS}
+                         ${THIRD_PARTY_HEADERS})
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>
@@ -127,7 +127,7 @@ if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
     EXPORT ${TARGETS_EXPORT_NAME}
     DESTINATION lib)
 
-install(
-  FILES include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt
-  DESTINATION include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt)
+  install(
+    FILES include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt
+    DESTINATION include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt)
 endif()
