@@ -20,6 +20,7 @@ Releases are available on the [github repository](https://github.com/Gepetto/bip
 - ⚠️ The unit-tests framework was changed from boots-unittests to doctest
 - Upgrade of the CMake minimal version to 3.22.1
 - Upgrade of the handling of the jrl-cmakemodules dependency in the CMake
+- flake8 & black -> ruff
 
 ## [1.3.0] - 2023-02-02
 
