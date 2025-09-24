@@ -16,7 +16,7 @@ import unittest
 unittest.util._MAX_LENGTH = 2000
 
 
-class TestCopStabilizer(unittest.TestCase):
+class TestCop3dStabilizer(unittest.TestCase):
     def setUp(self):
         self.printing = True
 
@@ -336,6 +336,24 @@ def print_loop_results(results, arguments, w2, printing=False):
         print("desired_cop_reference = ", results[5])
         print("desired_cop_computed = ", results[6])
         print("----------------------------")
+
+
+class TestCop2dStabilizer(TestCop3dStabilizer):
+    def setUp(self):
+        TestCop3dStabilizer.setUp(self)
+        self.arguments["actual_cop"] = np.zeros(2)
+
+    def test_constructor(self):
+        TestCop3dStabilizer.test_constructor(self)
+
+    def test_pcc_stabilization(self):
+        TestCop3dStabilizer.test_pcc_stabilization(self)
+
+    def test_pcc_stabilization_with_integral_term(self):
+        TestCop3dStabilizer.test_pcc_stabilization_with_integral_term(self)
+
+    def test_jccc_stabilization(self):
+        TestCop3dStabilizer.test_jccc_stabilization(self)
 
 
 if __name__ == "__main__":
