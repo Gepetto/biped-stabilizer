@@ -12,6 +12,8 @@ Releases are available on the [github repository](https://github.com/Gepetto/bip
 ### added
 
 - CI in nix added.
+- Add a new representation of the CoP in Vector2d https://github.com/Gepetto/biped-stabilizer/pull/51
+- Deprecate the CoP representation in Vector3d https://github.com/Gepetto/biped-stabilizer/pull/51
 
 ### changed
 
