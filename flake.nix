@@ -26,6 +26,11 @@
           packages = {
             default = self'.packages.biped-stabilizer;
             biped-stabilizer = pkgs.python3Packages.biped-stabilizer.overrideAttrs {
+              checkInputs = [
+                pkgs.doctest
+                pkgs.python3Packages.pinocchio
+                pkgs.python3Packages.example-robot-data
+              ];
               src = lib.fileset.toSource {
                 root = ./.;
                 fileset = lib.fileset.unions [
