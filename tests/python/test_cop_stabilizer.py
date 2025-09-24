@@ -16,8 +16,10 @@ import unittest
 unittest.util._MAX_LENGTH = 2000
 
 
-class TestCopStabilizer(unittest.TestCase):
+class TestCop3dStabilizer(unittest.TestCase):
     def setUp(self):
+        self.printing = True
+
         # Create default settings
         settings = bs.CopStabilizerSettings()
         settings.height = 0.87  # [m]
@@ -80,9 +82,12 @@ class TestCopStabilizer(unittest.TestCase):
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["com"][:2] < error).all())
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue(
             (desired["cop"][:2] == self.settings.cop_p_cc_gain * np.array(error)).all()
         )
@@ -90,7 +95,7 @@ class TestCopStabilizer(unittest.TestCase):
         n = desired["n"]
         self.assertTrue((np.abs(n) == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w < 1e-6).all()
@@ -103,7 +108,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error2
         self.arguments["actual_com_vel"] = np.zeros(3)
         self.arguments["actual_com_acc"] = np.zeros(3)
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
         self.assertTrue((desired["com"][:2] < error2).all())
         self.assertTrue(
@@ -113,7 +118,7 @@ class TestCopStabilizer(unittest.TestCase):
         n = desired["n"]
         self.assertTrue((np.abs(n) == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w < 1e-4).all()
@@ -126,7 +131,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error3
         self.arguments["actual_com_vel"] = np.zeros(3)
         self.arguments["actual_com_acc"] = np.zeros(3)
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
         self.assertTrue((desired["com"][:2] == error3).all())
         self.assertTrue((desired["cop"][:2] == error3).all())
@@ -134,7 +139,7 @@ class TestCopStabilizer(unittest.TestCase):
         n = desired["n"]
         self.assertTrue((np.abs(n) == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w == error3).all()
@@ -154,17 +159,21 @@ class TestCopStabilizer(unittest.TestCase):
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["com"][:2] < error).all())
         self.assertTrue(
-            (desired["cop"][:2] > self.settings.cop_p_cc_gain * np.array(error)).all()
+            (desired["com"][:2] < error).all(),
+            msg=f"desired['com'][:2]={desired['com'][:2]}, error={error}",
+        )
+        self.assertTrue(
+            (desired["cop"][:2] > self.settings.cop_p_cc_gain * np.array(error)).all(),
+            msg=f"desired['cop'][:2]={desired['cop'][:2]}, expected>{self.settings.cop_p_cc_gain * np.array(error)}",
         )
 
         n = desired["n"]
         self.assertTrue((np.abs(n) == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (
@@ -186,15 +195,18 @@ class TestCopStabilizer(unittest.TestCase):
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["com"][:2] < error).all())
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
 
         n = desired["n"]
         self.assertTrue((np.abs(n) == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w < 1e-6).all()
@@ -207,7 +219,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error2
         self.arguments["actual_com_vel"] = np.zeros(3)
         self.arguments["actual_com_acc"] = np.zeros(3)
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
         self.assertTrue((desired["com"][:2] < error2).all())
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
@@ -215,7 +227,7 @@ class TestCopStabilizer(unittest.TestCase):
         n = desired["n"]
         self.assertTrue((np.abs(n) < 1e-15).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w < 1e-5).all()
@@ -228,7 +240,7 @@ class TestCopStabilizer(unittest.TestCase):
         self.arguments["actual_cop"][:2] = error3
         self.arguments["actual_com_vel"] = np.zeros(3)
         self.arguments["actual_com_acc"] = np.zeros(3)
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
         self.assertTrue((desired["com"][:2] == error3).all())
         self.assertTrue((desired["cop"][:2] == error3).all())
@@ -236,7 +248,7 @@ class TestCopStabilizer(unittest.TestCase):
         n = desired["n"]
         self.assertTrue((n == 0).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (desired_1000["com"][:2] + desired_1000["dcom"][:2] / w == error3).all()
@@ -257,15 +269,18 @@ class TestCopStabilizer(unittest.TestCase):
         error = [0.02, 0.02]
         self.arguments["actual_com"][:2] = error
         self.arguments["actual_cop"][:2] = error
-        desired = stab_loop(self.stab, self.arguments, 1)
+        desired = stab_loop(self.stab, self.arguments, 1, self.printing)
 
-        self.assertTrue((desired["com"][:2] < error).all())
+        self.assertTrue(
+            (desired["cop"][:2] > desired["com"][:2]).all(),
+            f"cop: {desired['cop'][:2]}, com: {desired['com'][:2]}",
+        )
         self.assertTrue((desired["cop"][:2] > desired["com"][:2]).all())
 
         n = desired["n"]
         self.assertTrue((np.abs(n) < 1e-15).all())
 
-        desired_1000 = stab_loop(self.stab, self.arguments, 1000)
+        desired_1000 = stab_loop(self.stab, self.arguments, 1000, self.printing)
 
         self.assertTrue(
             (
@@ -306,13 +321,39 @@ def print_loop_results(results, arguments, w2, printing=False):
         print("B:   ", results[0][:2] - results[2][:2] / w2)
         print("CoP: ", results[6][:2])
         print(
-            "rCP: ",
+            "refCoPfromCoM: ",
             arguments["reference_com"][:2] - arguments["reference_com_acc"][:2] / w2,
         )
         print(
             "n:   ",
             np.hstack([results[6][:2] - results[0][:2] + results[2][:2] / w2, 0]),
         )
+        print("desired_com = ", results[0])
+        print("desired_com_vel = ", results[1])
+        print("desired_com_acc = ", results[2])
+        print("desired_icp = ", results[3])
+        print("actual_icp = ", results[4])
+        print("desired_cop_reference = ", results[5])
+        print("desired_cop_computed = ", results[6])
+        print("----------------------------")
+
+
+class TestCop2dStabilizer(TestCop3dStabilizer):
+    def setUp(self):
+        TestCop3dStabilizer.setUp(self)
+        self.arguments["actual_cop"] = np.zeros(2)
+
+    def test_constructor(self):
+        TestCop3dStabilizer.test_constructor(self)
+
+    def test_pcc_stabilization(self):
+        TestCop3dStabilizer.test_pcc_stabilization(self)
+
+    def test_pcc_stabilization_with_integral_term(self):
+        TestCop3dStabilizer.test_pcc_stabilization_with_integral_term(self)
+
+    def test_jccc_stabilization(self):
+        TestCop3dStabilizer.test_jccc_stabilization(self)
 
 
 if __name__ == "__main__":

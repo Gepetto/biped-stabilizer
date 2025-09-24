@@ -101,20 +101,20 @@ public:
   CopStabilizer();
 
   /**
-   * @brief CopStabilizer
-   * @param g the gravity constant along z
-   * @param height the default height of the CoM
-   * @param dt the timestep used by the controller
-   * @param cop_gains the gains (x, y, z) used by the feedback law
+   * @brief CopStabilizer stabilize the CoP around a reference point.
+   * @param settings the settings for the CoP stabilizer, see
+   * CopStabilizerSettings.
    */
   CopStabilizer(const CopStabilizerSettings &settings);
 
   virtual ~CopStabilizer();
 
-  void configure(const CopStabilizerSettings &settings);
+  virtual void configure(const CopStabilizerSettings &settings);
 
   const CopStabilizerSettings &getSettings() { return settings_; }
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                  const eVector3 &actual_com_acc, const eVector3 &actual_cop,
                  const eMatrixHoms &actual_stance_poses,
@@ -128,6 +128,8 @@ public:
                  eVector3 &desired_cop_reference, // ???
                  eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                  const eVector3 &actual_com_acc, const eVector3 &actual_cop,
                  const Polygon2D &support_polygon,
@@ -141,6 +143,8 @@ public:
                  eVector3 &desired_cop_reference, // ???
                  eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilizeCOP(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                     const eVector3 &actual_com_acc, const eVector3 &actual_cop,
                     const Polygon2D &support_polygon,
@@ -153,6 +157,8 @@ public:
                     eVector3 &desired_cop_reference, // ???
                     eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilizeApproximateAcceleration(
       const eVector3 &actual_com, const eVector3 &actual_com_vel,
       const eVector3 &actual_com_acc, const eVector3 &actual_cop,
@@ -165,6 +171,8 @@ public:
       eVector3 &desired_cop_reference, // ???
       eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilizeP_CC(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                      const eVector3 &actual_com_acc, const eVector3 &actual_cop,
                      const Polygon2D &support_polygon,
@@ -177,6 +185,8 @@ public:
                      eVector3 &desired_cop_reference, // ???
                      eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
   void stabilizeJerk(const eVector3 &actual_com, const eVector3 &actual_com_vel,
                      const eVector3 &actual_com_acc, const eVector3 &actual_cop,
                      const Polygon2D &support_polygon,
@@ -190,6 +200,88 @@ public:
                      eVector3 &desired_cop_reference, // ???
                      eVector3 &desired_cop_computed);
 
+  [[deprecated("The usage of the eVector3 for the CoP is deprecated, use "
+               "the eVector2 version instead.")]]
+  double distributeForces(const eVector3 &desired_cop, const eVector2 LF_xy,
+                          const double LF_force_z, const eVector2 LF_torque_xy,
+                          const eVector2 RF_xy, const double RF_force_z,
+                          const eVector2 RF_torque_xy);
+
+  void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                 const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+                 const eMatrixHoms &actual_stance_poses,
+                 const eVector3 &reference_com,
+                 const eVector3 &reference_com_vel,
+                 const eVector3 &reference_com_acc,
+                 const eVector3 &reference_com_jerk, eVector3 &desired_com,
+                 eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                 eVector3 &desired_icp,           // ???
+                 eVector3 &actual_icp,            // ???
+                 eVector2 &desired_cop_reference, // ???
+                 eVector2 &desired_cop_computed);
+
+  void stabilize(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                 const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+                 const Polygon2D &support_polygon,
+                 const eVector3 &reference_com,
+                 const eVector3 &reference_com_vel,
+                 const eVector3 &reference_com_acc,
+                 const eVector3 &reference_com_jerk, eVector3 &desired_com,
+                 eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                 eVector3 &desired_icp,           // ???
+                 eVector3 &actual_icp,            // ???
+                 eVector2 &desired_cop_reference, // ???
+                 eVector2 &desired_cop_computed);
+
+  void stabilizeCOP(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                    const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+                    const Polygon2D &support_polygon,
+                    const eVector3 &reference_com,
+                    const eVector3 &reference_com_vel,
+                    const eVector3 &reference_com_acc, eVector3 &desired_com,
+                    eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                    eVector3 &desired_icp,           // ???
+                    eVector3 &actual_icp,            // ???
+                    eVector2 &desired_cop_reference, // ???
+                    eVector2 &desired_cop_computed);
+
+  void stabilizeApproximateAcceleration(
+      const eVector3 &actual_com, const eVector3 &actual_com_vel,
+      const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+      const Polygon2D &support_polygon, const eVector3 &reference_com,
+      const eVector3 &reference_com_vel, const eVector3 &reference_com_acc,
+      eVector3 &desired_com, eVector3 &desired_com_vel,
+      eVector3 &desired_com_acc,
+      eVector3 &desired_icp,           // ???
+      eVector3 &actual_icp,            // ???
+      eVector2 &desired_cop_reference, // ???
+      eVector2 &desired_cop_computed);
+
+  void stabilizeP_CC(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                     const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+                     const Polygon2D &support_polygon,
+                     const eVector3 &reference_com,
+                     const eVector3 &reference_com_vel,
+                     const eVector3 &reference_com_acc, eVector3 &desired_com,
+                     eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                     eVector3 &desired_icp,           // ???
+                     eVector3 &actual_icp,            // ???
+                     eVector2 &desired_cop_reference, // ???
+                     eVector2 &desired_cop_computed);
+
+  void stabilizeJerk(const eVector3 &actual_com, const eVector3 &actual_com_vel,
+                     const eVector3 &actual_com_acc, const eVector2 &actual_cop,
+                     const Polygon2D &support_polygon,
+                     const eVector3 &reference_com,
+                     const eVector3 &reference_com_vel,
+                     const eVector3 &reference_com_acc,
+                     const eVector3 &reference_com_jerk, eVector3 &desired_com,
+                     eVector3 &desired_com_vel, eVector3 &desired_com_acc,
+                     eVector3 &desired_icp,           // ???
+                     eVector3 &actual_icp,            // ???
+                     eVector2 &desired_cop_reference, // ???
+                     eVector2 &desired_cop_computed);
+
   double distributeForces(const eVector2 &desired_cop, const eVector2 LF_xy,
                           const double LF_force_z, const eVector2 LF_torque_xy,
                           const eVector2 RF_xy, const double RF_force_z,
@@ -197,7 +289,7 @@ public:
 
   std::array<eVector3, 3> getStableCoMs(const double &com_height);
 
-  void setCOPgains(const eVector3 &cop_x_gains, eVector3 &cop_y_gains);
+  void setCOPgains(const eVector3 &cop_x_gains, const eVector3 &cop_y_gains);
 
   void setPCCgains(const double cop_pcc_gains);
 
@@ -257,7 +349,7 @@ private:
                         const Eigen::Vector2d &CoM_acc, eVector3 &n);
 
   void getNonLinearPart(const eVector3 &com, const eVector3 &com_acc,
-                        const eVector3 &cop, eVector3 &n);
+                        const eVector2 &cop, eVector3 &n);
 
   void getNonLinearPart(eVector3 &n);
 
