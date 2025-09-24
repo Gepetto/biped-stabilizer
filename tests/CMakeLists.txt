@@ -1,8 +1,8 @@
-add_unit_test(test_cop_stabilizer cpp/test_cop_stabilizer.cpp)
-target_link_libraries(test_cop_stabilizer PUBLIC ${PROJECT_NAME})
-target_include_directories(test_cop_stabilizer
-                           PRIVATE Boost::unit_test_framework)
+add_unit_test(test-biped-stabilizer-cpp cpp/test_cop_stabilizer.cpp)
+target_link_libraries(test-biped-stabilizer-cpp PUBLIC ${PROJECT_NAME})
+target_include_directories(test-biped-stabilizer-cpp
+                           PRIVATE doctest::doctest)
 if(BUILD_PYTHON_INTERFACE)
-  add_python_unit_test("test_cop_stabilizer_py"
+  add_python_unit_test("test-biped-stabilizer-py"
                        "tests/python/test_cop_stabilizer.py" "python")
 endif()
