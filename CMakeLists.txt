@@ -7,12 +7,10 @@ set(PROJECT_DESCRIPTION "Stabilizer for Biped Locomotion")
 set(PROJECT_URL https://github.com/${PROJECT_NAMESPACE}/${PROJECT_NAME})
 
 # Project options
-option(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
-option(INSTALL_PYTHON_INTERFACE_ONLY "Install *ONLY* the python bindings" OFF)
 option(SUFFIX_SO_VERSION "Suffix library name with its version" ON)
 
 # Project configuration
-if(NOT INSTALL_PYTHON_INTERFACE_ONLY)
+if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   set(PROJECT_USE_CMAKE_EXPORT TRUE)
 endif()
 set(CUSTOM_HEADER_DIR ${PROJECT_NAME})
@@ -47,11 +45,13 @@ project(${PROJECT_NAME} ${PROJECT_ARGS})
 
 # Project dependencies
 find_package(Eigen3 REQUIRED)
+
 if(BUILD_PYTHON_INTERFACE)
   find_package(eigenpy 2.7.12 REQUIRED)
   string(REGEX REPLACE "-" "_" PY_NAME ${PROJECT_NAME})
   set(${PY_NAME}_INSTALL_DIR ${PYTHON_SITELIB}/${PY_NAME})
 endif()
+
 if(BUILD_TESTING)
   # Prepare doctest for other targets to use.
   find_package(doctest QUIET)
@@ -97,11 +97,11 @@ set(THIRD_PARTY_HEADERS
     include/${PROJECT_NAME}/third_party/wykobi/wykobi_utilities.hpp)
 
 # Main Library
-set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp
-                            ${THIRD_PARTY_HEADERS})
+set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
 add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
-                                   ${${PROJECT_NAME}_HEADERS})
+                                   ${${PROJECT_NAME}_HEADERS}
+                                   ${THIRD_PARTY_HEADERS})
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>
@@ -121,14 +121,13 @@ if(BUILD_TESTING)
 endif()
 
 # Installation
-if(NOT INSTALL_PYTHON_INTERFACE_ONLY)
+if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   install(
     TARGETS ${PROJECT_NAME}
     EXPORT ${TARGETS_EXPORT_NAME}
     DESTINATION lib)
-  install(FILES package.xml DESTINATION share/${PROJECT_NAME})
-endif()
 
 install(
   FILES include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt
   DESTINATION include/${PROJECT_NAME}/third_party/wykobi/wykobi_license.txt)
+endif()
