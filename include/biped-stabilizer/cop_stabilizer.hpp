@@ -48,7 +48,7 @@ public:
   bool saturate_cop = true;
   bool use_rate_limited_dcm = false;
 
-  bool operator==(const CopStabilizerSettings &rhs) {
+  bool operator==(const CopStabilizerSettings &rhs) const {
     bool test = true;
     test &= this->height == rhs.height;
     test &= this->foot_length == rhs.foot_length;
