@@ -9,7 +9,7 @@ Releases are available on the [github repository](https://github.com/Gepetto/bip
 
 ## [Unreleased]
 
-## [1.4.0] - 1980-01-01
+## [1.4.0] - 2025-10-07
 
 ### added
 
