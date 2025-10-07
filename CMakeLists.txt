@@ -97,11 +97,11 @@ set(THIRD_PARTY_HEADERS
     include/${PROJECT_NAME}/third_party/wykobi/wykobi_utilities.hpp)
 
 # Main Library
-set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp)
+set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp
+                            ${THIRD_PARTY_HEADERS})
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
-add_library(
-  ${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES} ${${PROJECT_NAME}_HEADERS}
-                         ${THIRD_PARTY_HEADERS})
+add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
+                                   ${${PROJECT_NAME}_HEADERS})
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>
