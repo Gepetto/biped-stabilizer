@@ -23,6 +23,11 @@
   <depend>jrl_cmakemodules</depend>
   <depend>eigen</depend>
 
+  <!-- Python dependencies. -->
+  <depend>eigenpy</depend>
+  <depend>pinocchio</depend>
+  <depend>example-robot-data</depend>
+
   <test_depend>doctest</test_depend>
   <test_depend>pinocchio</test_depend>
   <test_depend>example-robot-data</test_depend>
