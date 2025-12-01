@@ -1,5 +1,5 @@
 {
-  description = " Stabilizer for Biped Locomotion ";
+  description = "Stabilizer for Biped Locomotion ";
 
   inputs = {
     gepetto.url = "github:gepetto/nix";
@@ -12,38 +12,37 @@
 
   outputs =
     inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = import inputs.systems;
-      imports = [ inputs.gepetto.flakeModule ];
-      perSystem =
-        {
-          lib,
-          pkgs,
-          self',
-          ...
-        }:
-        {
-          packages = {
-            default = self'.packages.biped-stabilizer;
-            biped-stabilizer = pkgs.python3Packages.biped-stabilizer.overrideAttrs {
-              checkInputs = [
-                pkgs.doctest
-                pkgs.python3Packages.pinocchio
-                pkgs.python3Packages.example-robot-data
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } (
+      { lib, self, ... }:
+      {
+        systems = import inputs.systems;
+        imports = [
+          inputs.gepetto.flakeModule
+          { gepetto-pkgs.overlays = [ self.overlays.default ]; }
+        ];
+        flake.overlays.default = _final: prev: {
+          biped-stabilizer = prev.biped-stabilizer.overrideAttrs {
+            src = lib.fileset.toSource {
+              root = ./.;
+              fileset = lib.fileset.unions [
+                ./CMakeLists.txt
+                ./include
+                ./package.xml
+                ./python
+                ./src
+                ./tests
               ];
-              src = lib.fileset.toSource {
-                root = ./.;
-                fileset = lib.fileset.unions [
-                  ./CMakeLists.txt
-                  ./include
-                  ./package.xml
-                  ./python
-                  ./src
-                  ./tests
-                ];
-              };
             };
           };
         };
-    };
+        perSystem =
+          { pkgs, self', ... }:
+          {
+            packages = {
+              default = self'.packages.biped-stabilizer;
+              biped-stabilizer = pkgs.python3Packages.biped-stabilizer;
+            };
+          };
+      }
+    );
 }
