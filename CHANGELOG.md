@@ -9,6 +9,11 @@ Releases are available on the [github repository](https://github.com/Gepetto/bip
 
 ## [Unreleased]
 
+- Add the python dependencies to the package.xml
+- sync submodule
+- update nix packaging
+- fix cmake standalone setup
+
 ## [1.4.0] - 2025-10-07
 
 ### added
