@@ -22,6 +22,7 @@
         ];
         flake.overlays.default = _final: prev: {
           biped-stabilizer = prev.biped-stabilizer.overrideAttrs {
+            patches = [ ];
             src = lib.fileset.toSource {
               root = ./.;
               fileset = lib.fileset.unions [
@@ -40,7 +41,7 @@
           {
             packages = {
               default = self'.packages.biped-stabilizer;
-              biped-stabilizer = pkgs.python3Packages.biped-stabilizer;
+              biped-stabilizer = pkgs.python3Packages.biped-stabilizer.override { buildStandalone = false; };
             };
           };
       }
