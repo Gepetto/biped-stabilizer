@@ -22,7 +22,6 @@
         ];
         flake.overlays.default = _final: prev: {
           biped-stabilizer = prev.biped-stabilizer.overrideAttrs {
-            patches = [ ];
             src = lib.fileset.toSource {
               root = ./.;
               fileset = lib.fileset.unions [
