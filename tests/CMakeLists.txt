@@ -1,7 +1,8 @@
 if(NOT BUILD_STANDALONE_PYTHON_INTERFACE)
   add_unit_test(test-biped-stabilizer-cpp cpp/test_cop_stabilizer.cpp)
-  target_link_libraries(test-biped-stabilizer-cpp PUBLIC ${PROJECT_NAME}
-                                                         doctest::doctest)
+  target_link_libraries(
+    test-biped-stabilizer-cpp PUBLIC ${PROJECT_NAME}::${PROJECT_NAME}
+                                     doctest::doctest)
 endif()
 if(BUILD_PYTHON_INTERFACE)
   add_python_unit_test("test-biped-stabilizer-py"

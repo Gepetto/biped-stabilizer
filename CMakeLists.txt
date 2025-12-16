@@ -100,14 +100,21 @@ set(THIRD_PARTY_HEADERS
 set(${PROJECT_NAME}_HEADERS include/${PROJECT_NAME}/cop_stabilizer.hpp
                             ${THIRD_PARTY_HEADERS})
 set(${PROJECT_NAME}_SOURCES src/cop_stabilizer.cpp)
-add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
-                                   ${${PROJECT_NAME}_HEADERS})
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-target_include_directories(
-  ${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>
-                         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
-if(SUFFIX_SO_VERSION)
-  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${PROJECT_VERSION})
+
+if(BUILD_STANDALONE_PYTHON_INTERFACE)
+  find_package(${PROJECT_NAME} REQUIRED CONFIG)
+else()
+  add_library(${PROJECT_NAME} SHARED ${${PROJECT_NAME}_SOURCES}
+                                     ${${PROJECT_NAME}_HEADERS})
+  add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+  target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+  target_include_directories(
+    ${PROJECT_NAME} PUBLIC $<INSTALL_INTERFACE:include>
+                           $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>)
+  if(SUFFIX_SO_VERSION)
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION
+                                                     ${PROJECT_VERSION})
+  endif()
 endif()
 
 # Python Bindings
