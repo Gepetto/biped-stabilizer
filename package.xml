@@ -26,7 +26,7 @@
   <!-- Python dependencies. -->
   <depend>eigenpy</depend>
   <depend>pinocchio</depend>
-  <depend>example-robot-data</depend>
+  <depend>example-robot-descriptions</depend>
 
   <test_depend>doctest</test_depend>
   <test_depend>pinocchio</test_depend>
